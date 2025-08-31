@@ -24,6 +24,7 @@
     "@better-fetch/fetch": "1.1.18",
     "@orpc/client": "1.8.5",
     "@orpc/server": "1.8.5",
+    "@orpc/tanstack-query": "1.8.5",
     "@t3-oss/env-nextjs": "0.13.8",
     "@tanstack/react-form": "1.19.3",
     "better-auth": "1.3.7",
