@@ -1,0 +1,16 @@
+name: betterprofile-dev
+
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: betterprofile
+      POSTGRES_PASSWORD: betterprofile
+      POSTGRES_DB: betterprofile
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data: {}

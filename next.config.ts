@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
+import { pipe } from 'remeda'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+	typedRoutes: false,
+	pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
+	experimental: {
+		reactCompiler: false,
+	},
+}
 
-export default nextConfig;
+export default pipe(nextConfig)
