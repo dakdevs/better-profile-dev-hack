@@ -18,7 +18,7 @@ export default function PageContainer({
 }) {
 	return (
 		<div className="space-y-md">
-			<div className="py-md px-sm md:px-lg border-b border-neutral-200">
+			<div className="p-md md:px-lg border-b border-neutral-200">
 				<h1 className="font-rakkas text-xl md:text-3xl">{title}</h1>
 				<p className="text-sm text-neutral-500">{description}</p>
 			</div>

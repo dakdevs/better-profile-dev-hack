@@ -1,13 +1,10 @@
-import { sql, type AnyColumn, type GetColumnData, type SQL } from 'drizzle-orm'
+import { sql, type AnyColumn, type SQL } from 'drizzle-orm'
 import { drizzle as drizzleNeon } from 'drizzle-orm/neon-serverless'
 import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres'
-import { withReplicas } from 'drizzle-orm/pg-core'
 
 import { serverConfig } from '~/config/server-config'
 
 import * as schema from './models'
-
-type NonEmptyArray<T> = [T, ...T[]]
 
 const createNeonDatabaseConnection = () => {
 	return drizzleNeon({
@@ -28,8 +25,8 @@ const createPgDatabaseConnection = () => {
 }
 
 export const db = serverConfig.app.isDevelopment
-	? createNeonDatabaseConnection()
-	: createPgDatabaseConnection()
+	? createPgDatabaseConnection()
+	: createNeonDatabaseConnection()
 
 export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
 
