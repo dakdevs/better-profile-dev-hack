@@ -50,33 +50,24 @@ export default function NavigationItem({
 	)
 }
 
-type LinkHref = ComponentProps<typeof Link>['href']
+function isActiveForHref(
+	currentPathname: string,
+	href: ComponentProps<typeof Link>['href'],
+	allowPrefix: boolean,
+) {
+	const parsedHref = typeof href === 'string' ? href : href.href
 
-function normalizePath(input: unknown): string {
-	if (input == null) return '/'
-	const str = String(input).split('#')[0].split('?')[0]
-	const withLeading = str.startsWith('/') ? str : `/${str}`
-	if (withLeading.length > 1 && withLeading.endsWith('/')) return withLeading.slice(0, -1)
-	return withLeading || '/'
-}
-
-function hrefToPathname(href: LinkHref): string {
-	if (typeof href === 'string') return normalizePath(href)
-	if (href instanceof URL) return normalizePath(href.pathname)
-	if (typeof href === 'object' && href !== null && 'pathname' in href) {
-		const pathname = (href as { pathname?: unknown }).pathname
-		return normalizePath(typeof pathname === 'string' ? pathname : '')
+	if (!parsedHref) {
+		return false
 	}
-	return normalizePath(String(href))
-}
 
-function isActiveForHref(currentPathname: string, href: LinkHref, allowPrefix: boolean): boolean {
-	const current = normalizePath(currentPathname)
-	const target = hrefToPathname(href)
+	if (currentPathname === parsedHref) {
+		return true
+	}
 
-	if (!allowPrefix) return current === target
+	if (allowPrefix && currentPathname.startsWith(parsedHref)) {
+		return true
+	}
 
-	if (target === '/') return current === '/'
-	if (current === target) return true
-	return current.startsWith(`${target}/`)
+	return false
 }
