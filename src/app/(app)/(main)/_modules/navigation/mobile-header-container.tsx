@@ -2,7 +2,7 @@
 
 import { Menu } from 'lucide-react'
 
-import useNavigationState from './navigation-atom'
+import { useNavigationState } from '~/atoms/navigation-atom'
 
 export default function MobileHeader() {
 	const [navigationState, setNavigationState] = useNavigationState()

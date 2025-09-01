@@ -4,7 +4,10 @@ import type { ComponentProps, ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+import { useExpandNavigation } from '~/atoms/navigation-atom'
 import { cn } from '~/utils/cn'
+
+import HideOnCollapse from './hide-on-collapse'
 
 export default function NavigationItem({
 	navIcon,
@@ -17,23 +20,25 @@ export default function NavigationItem({
 	navIcon: ReactNode
 	allowActivePrefix?: boolean
 } & ComponentProps<typeof Link>) {
-	const pathname = usePathname()
+	const [expandNavigation] = useExpandNavigation()
 
+	const pathname = usePathname()
 	const isActive = isActiveForHref(pathname, linkProps.href, allowActivePrefix)
 
 	return (
 		<Link
 			{...linkProps}
 			className={cn(
-				'gap-md py-sm px-md group flex items-center rounded-md text-lg font-medium transition-colors duration-300',
+				'gap-md py-sm px-md group flex h-11 items-center rounded-md text-lg font-medium transition-colors duration-300',
 				isActive ? 'bg-neutral-100' : 'bg-transparent',
 				className,
 			)}
 		>
 			<span
 				className={cn(
-					'transition-colors duration-150',
+					'w-fit transition-colors duration-150',
 					isActive ? 'text-neutral-900' : 'text-neutral-500 group-hover:text-neutral-900',
+					!expandNavigation && 'flex items-center justify-center',
 				)}
 			>
 				{navIcon}
@@ -44,7 +49,7 @@ export default function NavigationItem({
 					isActive ? 'text-neutral-900' : 'text-neutral-500 group-hover:text-neutral-900',
 				)}
 			>
-				{label}
+				<HideOnCollapse>{label}</HideOnCollapse>
 			</span>
 		</Link>
 	)

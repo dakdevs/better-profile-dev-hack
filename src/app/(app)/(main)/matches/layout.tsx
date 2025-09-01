@@ -7,8 +7,8 @@ export default function MatchesLayout({ children }: { children: ReactNode }) {
 		<PageContainer
 			title="Matched Roles"
 			description="View the roles you will succeed in"
-			bannerImage="/images/matches-banner.png"
-			bannerImageClassName="object-top"
+			bannerImage="/images/matches-banner-v2.png"
+			bannerImageClassName="object-top-right"
 		>
 			{children}
 		</PageContainer>

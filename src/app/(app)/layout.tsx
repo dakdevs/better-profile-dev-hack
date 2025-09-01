@@ -5,6 +5,7 @@ import '@mantine/core/styles.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from '@mantine/core'
+import { Provider } from 'jotai'
 
 import { geistMono, instrumentSans, rakkas } from '~/fonts'
 import { cn } from '~/utils/cn'
@@ -67,9 +68,13 @@ export default function RootLayout({
 			</head>
 			<TanstackQueryClientProvider>
 				<body className="h-full font-sans">
-					<MantineProvider theme={{ fontFamily: 'var(--font-sans), Helvetica, Arial, sans-serif' }}>
-						{children}
-					</MantineProvider>
+					<Provider>
+						<MantineProvider
+							theme={{ fontFamily: 'var(--font-sans), Helvetica, Arial, sans-serif' }}
+						>
+							{children}
+						</MantineProvider>
+					</Provider>
 				</body>
 			</TanstackQueryClientProvider>
 		</html>

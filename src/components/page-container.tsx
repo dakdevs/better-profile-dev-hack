@@ -3,6 +3,8 @@ import Image from 'next/image'
 
 import { cn } from '~/utils/cn'
 
+import SidebarToggle from './sidebar-toggle'
+
 export default function PageContainer({
 	title,
 	description,
@@ -20,9 +22,12 @@ export default function PageContainer({
 }) {
 	return (
 		<div className="space-y-md flex flex-1 flex-col">
-			<div className="p-md md:px-lg border-b border-neutral-200">
-				<h1 className="font-rakkas text-xl md:text-3xl">{title}</h1>
-				<p className="text-sm text-neutral-500">{description}</p>
+			<div className="gap-md p-md flex items-center border-b border-neutral-200">
+				<SidebarToggle displayOn="collapsed" />
+				<div className="">
+					<h1 className="font-rakkas text-xl md:text-3xl">{title}</h1>
+					<p className="text-sm text-neutral-500">{description}</p>
+				</div>
 			</div>
 			{bannerImage && bannerPostion === 'top' ? (
 				<div className="px-md">

@@ -2,23 +2,30 @@
 
 import type { ReactNode } from 'react'
 
+import { useExpandNavigation, useNavigationState } from '~/atoms/navigation-atom'
 import { cn } from '~/utils/cn'
-
-import useNavigationState from './navigation-atom'
 
 export default function NavigationContainer({ children }: { children: ReactNode }) {
 	const [navigationState] = useNavigationState()
+	const [expandNavigation] = useExpandNavigation()
 
 	return (
 		<div
 			className={cn(
-				'overflow-none fixed top-0 right-0 bottom-0 left-0 z-10 h-full bg-white transition-all duration-300 ease-in-out md:static md:z-0 md:w-72 md:bg-neutral-50/50 md:transition-none',
-				navigationState
-					? 'translate-x-0 opacity-100'
-					: '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100',
+				'transition-all duration-200 ease-in-out',
+				expandNavigation ? 'md:w-72' : 'md:w-[70px]',
 			)}
 		>
-			{children}
+			<div
+				className={cn(
+					'overflow-none fixed top-0 right-0 bottom-0 left-0 z-10 h-full bg-white transition-all duration-300 ease-in-out md:static md:z-0 md:bg-neutral-50/50 md:transition-none',
+					navigationState
+						? 'translate-x-0 opacity-100'
+						: '-translate-x-full opacity-0 md:translate-x-0 md:opacity-100',
+				)}
+			>
+				{children}
+			</div>
 		</div>
 	)
 }

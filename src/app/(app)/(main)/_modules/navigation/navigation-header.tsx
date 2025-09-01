@@ -1,18 +1,28 @@
 'use client'
 
-import { ChevronsLeft, X } from 'lucide-react'
+import { X } from 'lucide-react'
 
-import useNavigationState from './navigation-atom'
+import { useExpandNavigation, useNavigationState } from '~/atoms/navigation-atom'
+import SidebarToggle from '~/components/sidebar-toggle'
+import { TextMorph } from '~/components/text-morph'
+import { cn } from '~/utils/cn'
 
 export default function NavigationHeader() {
 	const [navigationState, setNavigationState] = useNavigationState()
+	const [expandNavigation, setExpandNavigation] = useExpandNavigation()
+
+	const title = expandNavigation ? 'Better Profile' : 'BP'
 
 	return (
 		<>
-			<h1 className="font-rakkas text-better-indigo text-3xl">{'Better Profile'}</h1>
-			<button className="p-sm hidden aspect-square cursor-pointer rounded-md text-sm text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 md:block">
-				<ChevronsLeft size={24} />
-			</button>
+			<h1 className="font-rakkas text-better-indigo text-3xl">
+				<TextMorph
+					transition={{ ease: 'easeInOut', duration: 0.2 }}
+					className="whitespace-nowrap"
+				>
+					{title}
+				</TextMorph>
+			</h1>
 			<button
 				disabled={!navigationState}
 				onClick={() => {
@@ -22,6 +32,7 @@ export default function NavigationHeader() {
 			>
 				<X size={24} />
 			</button>
+			<SidebarToggle displayOn="expanded" />
 		</>
 	)
 }
