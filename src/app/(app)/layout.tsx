@@ -50,6 +50,16 @@ export default function RootLayout({
 		>
 			<head>
 				<ColorSchemeScript />
+				<link
+					rel="preload"
+					as="image"
+					href="/images/interview-banner.png"
+				/>
+				<link
+					rel="preload"
+					as="image"
+					href="/images/matches-banner.png"
+				/>
 			</head>
 			<TanstackQueryClientProvider>
 				<body className="h-full font-sans">
