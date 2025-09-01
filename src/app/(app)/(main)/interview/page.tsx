@@ -1,3 +1,3 @@
 export default function InterviewPage() {
-	return <div>Interview</div>
+	return <div>{'Interview'}</div>
 }

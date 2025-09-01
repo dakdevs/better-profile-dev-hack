@@ -10,23 +10,6 @@ type Session = typeof auth.$Infer.Session
 const PROTECTED_PATHS = ['/profile', '/account']
 const isProtectedPath = (url: URL) => PROTECTED_PATHS.some((path) => url.pathname.startsWith(path))
 
-export async function middleware(request: NextRequest) {
-	if (isProtectedPath(request.nextUrl)) {
-		const headersList = await headers()
-
-		const session = await getSession({
-			origin: request.nextUrl.origin,
-			cookie: headersList.get('cookie'),
-		})
-
-		if (!session) {
-			return NextResponse.redirect(new URL('/login', request.url))
-		}
-	}
-
-	return NextResponse.next()
-}
-
 const getSession = cache(async function ({
 	origin,
 	cookie,
@@ -43,6 +26,23 @@ const getSession = cache(async function ({
 
 	return session
 })
+
+export async function middleware(request: NextRequest) {
+	if (isProtectedPath(request.nextUrl)) {
+		const headersList = await headers()
+
+		const session = await getSession({
+			origin: request.nextUrl.origin,
+			cookie: headersList.get('cookie'),
+		})
+
+		if (!session) {
+			return NextResponse.redirect(new URL('/login', request.url))
+		}
+	}
+
+	return NextResponse.next()
+}
 
 export const config = {
 	matcher: [

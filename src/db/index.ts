@@ -28,6 +28,7 @@ export const db = serverConfig.app.isDevelopment
 	? createPgDatabaseConnection()
 	: createNeonDatabaseConnection()
 
+/** eslint-disable-next-line no-restricted-syntax */
 export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
 
 export const increment = (column: AnyColumn, value = 1) => {

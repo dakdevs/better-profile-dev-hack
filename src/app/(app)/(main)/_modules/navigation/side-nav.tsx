@@ -1,5 +1,3 @@
-import { ChevronsLeft } from 'lucide-react'
-
 import NavigationContainer from './navigation-container'
 import NavigationHeader from './navigation-header'
 import NavigationItem from './navigation-item'
