@@ -1,31 +1,40 @@
+import type { LucideIcon } from 'lucide-react'
+
+import AccountState from './account-state'
 import NavigationContainer from './navigation-container'
 import NavigationHeader from './navigation-header'
 import NavigationItem from './navigation-item'
-import navigationItems from './navigation-items'
+import { accountNavigationItems, mainNavigationItems } from './navigation-items'
 
 export default function SideNav() {
 	return (
 		<NavigationContainer>
-			<div className="p-sm space-y-md h-full w-full border-r border-neutral-200">
+			<div className="p-sm space-y-md flex size-full flex-col border-r border-neutral-200">
 				<div className="px-sm py-md flex items-center justify-between">
 					<NavigationHeader />
 				</div>
-				<Navigation />
+				<div className="flex flex-1 flex-col justify-between">
+					<Navigation items={mainNavigationItems} />
+					<div className="space-y-md">
+						<Navigation items={accountNavigationItems} />
+						<AccountState />
+					</div>
+				</div>
 			</div>
 		</NavigationContainer>
 	)
 }
 
-function Navigation() {
+function Navigation({ items }: { items: { label: string; href: string; icon: LucideIcon }[] }) {
 	return (
 		<ul className="space-y-xs">
-			{navigationItems.map((item) => {
+			{items.map(({ label, href, icon: NavIcon }) => {
 				return (
-					<li key={item.label}>
+					<li key={label}>
 						<NavigationItem
-							href={item.href}
-							navIcon={<item.icon size={18} />}
-							label={item.label}
+							href={href}
+							navIcon={<NavIcon size={18} />}
+							label={label}
 						/>
 					</li>
 				)

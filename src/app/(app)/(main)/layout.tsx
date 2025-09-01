@@ -8,7 +8,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 		<div className="flex h-full flex-col md:flex-row">
 			<SideNav />
 			<MobileHeader />
-			<main className="h-full flex-1">{children}</main>
+			<main className="flex h-full flex-1 flex-col">{children}</main>
 		</div>
 	)
 }

@@ -29,6 +29,12 @@ export const metadata: Metadata = {
 	description: METADATA_DESCRIPTION,
 }
 
+const imagePreloads = [
+	'/images/interview-banner.png',
+	'/images/matches-banner.png',
+	'/images/settings-banner.png',
+]
+
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -50,16 +56,14 @@ export default function RootLayout({
 		>
 			<head>
 				<ColorSchemeScript />
-				<link
-					rel="preload"
-					as="image"
-					href="/images/interview-banner.png"
-				/>
-				<link
-					rel="preload"
-					as="image"
-					href="/images/matches-banner.png"
-				/>
+				{imagePreloads.map((image) => (
+					<link
+						key={image}
+						rel="preload"
+						as="image"
+						href={image}
+					/>
+				))}
 			</head>
 			<TanstackQueryClientProvider>
 				<body className="h-full font-sans">

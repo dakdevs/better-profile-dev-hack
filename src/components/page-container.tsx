@@ -9,20 +9,22 @@ export default function PageContainer({
 	children,
 	bannerImage,
 	bannerImageClassName,
+	bannerPostion = 'top',
 }: {
 	title: string
 	description: string
 	children: ReactNode
 	bannerImage?: string
 	bannerImageClassName?: string
+	bannerPostion?: 'top' | 'right'
 }) {
 	return (
-		<div className="space-y-md">
+		<div className="space-y-md flex flex-1 flex-col">
 			<div className="p-md md:px-lg border-b border-neutral-200">
 				<h1 className="font-rakkas text-xl md:text-3xl">{title}</h1>
 				<p className="text-sm text-neutral-500">{description}</p>
 			</div>
-			{bannerImage ? (
+			{bannerImage && bannerPostion === 'top' ? (
 				<div className="px-md">
 					<div className="relative h-48 w-full">
 						<Image
@@ -34,7 +36,21 @@ export default function PageContainer({
 					</div>
 				</div>
 			) : null}
-			<div className="px-lg py-md">{children}</div>
+			<div className="px-lg py-md gap-md flex flex-1">
+				<div className="flex flex-1">{children}</div>
+				{bannerImage && bannerPostion === 'right' ? (
+					<div className="px-md flex w-48">
+						<div className="relative w-full flex-1">
+							<Image
+								src={bannerImage}
+								alt="banner"
+								fill
+								className={cn('rounded-lg object-cover', bannerImageClassName)}
+							/>
+						</div>
+					</div>
+				) : null}
+			</div>
 		</div>
 	)
 }
