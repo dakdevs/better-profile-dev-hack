@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { headers } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
 import { betterFetch } from '@better-fetch/fetch'
@@ -13,11 +14,9 @@ export async function middleware(request: NextRequest) {
 	if (isProtectedPath(request.nextUrl)) {
 		const headersList = await headers()
 
-		const { data: session } = await betterFetch<Session>('/api/auth/get-session', {
-			baseURL: request.nextUrl.origin,
-			headers: {
-				cookie: headersList.get('cookie') ?? '',
-			},
+		const session = await getSession({
+			origin: request.nextUrl.origin,
+			cookie: headersList.get('cookie'),
 		})
 
 		if (!session) {
@@ -27,6 +26,23 @@ export async function middleware(request: NextRequest) {
 
 	return NextResponse.next()
 }
+
+const getSession = cache(async function ({
+	origin,
+	cookie,
+}: {
+	origin: string
+	cookie: string | null
+}) {
+	const { data: session } = await betterFetch<Session>('/api/auth/get-session', {
+		baseURL: origin,
+		headers: {
+			cookie: cookie ?? '',
+		},
+	})
+
+	return session
+})
 
 export const config = {
 	matcher: [

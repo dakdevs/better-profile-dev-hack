@@ -8,31 +8,9 @@ export const authClient = createAuthClient({
 	baseURL: publicConfig.app.host,
 })
 
-export async function signInWithDiscord() {
+export async function signInWithGoogle() {
 	return await authClient.signIn.social({
-		provider: 'discord',
-	})
-}
-
-export async function connectLinkedIn({ callbackURL }: { callbackURL: string }) {
-	return await authClient.linkSocial({
-		provider: 'linkedin',
-		requestSignUp: false,
-		callbackURL,
-	})
-}
-
-export async function connectTwitter({ callbackURL }: { callbackURL: string }) {
-	return await authClient.linkSocial({
-		provider: 'twitter',
-		requestSignUp: false,
-		callbackURL,
-	})
-}
-
-export async function disconnectLinkedIn() {
-	return await authClient.unlinkAccount({
-		providerId: 'linkedin',
+		provider: 'google',
 	})
 }
 

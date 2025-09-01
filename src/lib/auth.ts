@@ -29,21 +29,10 @@ export const auth = betterAuth({
 		enabled: false,
 	},
 	socialProviders: {
-		discord: {
-			clientId: serverConfig.discord.clientId,
-			clientSecret: serverConfig.discord.clientSecret,
-			scope: ['identify', 'email', 'guilds'],
+		google: {
+			clientId: serverConfig.auth.google.clientId,
+			clientSecret: serverConfig.auth.google.clientSecret,
 		},
-		linkedin: {
-			clientId: serverConfig.linkedin.clientId,
-			clientSecret: serverConfig.linkedin.clientSecret,
-			scope: ['openid', 'email', 'profile'],
-		},
-		// twitter: {
-		// 	clientId: '',
-		// 	clientSecret: '',
-		// 	scope: ['tweet.read', 'users.read'],
-		// },
 	},
 	trustedOrigins: [publicConfig.app.host],
 	secret: serverConfig.betterAuth.secret,

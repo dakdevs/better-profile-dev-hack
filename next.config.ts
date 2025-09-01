@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
 	pageExtensions: ['md', 'mdx', 'ts', 'tsx'],
 	experimental: {
 		reactCompiler: false,
+		optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
 	},
 }
 
