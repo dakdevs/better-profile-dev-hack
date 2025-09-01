@@ -1,7 +1,6 @@
-import { useAtom } from 'jotai'
-import { atomWithStorage } from 'jotai/utils'
+import { atom, useAtom } from 'jotai'
 
-const navigationStateAtom = atomWithStorage('navigation-state', false)
+const navigationStateAtom = atom(false)
 
 export default function useNavigationState() {
 	return useAtom(navigationStateAtom)
