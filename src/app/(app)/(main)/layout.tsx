@@ -1,11 +1,13 @@
 import { ReactNode } from 'react'
 
+import MobileHeader from './_modules/navigation/mobile-header-container'
 import SideNav from './_modules/navigation/side-nav'
 
 export default function MainLayout({ children }: { children: ReactNode }) {
 	return (
-		<div className="flex">
+		<div className="flex h-full flex-col md:flex-row">
 			<SideNav />
+			<MobileHeader />
 			<main className="h-full flex-1">{children}</main>
 		</div>
 	)

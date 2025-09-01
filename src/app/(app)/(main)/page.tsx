@@ -1,3 +1,3 @@
 export default function HomePage() {
-	return <div>Home</div>
+	return <div className="flex size-full items-center justify-center">Home Placeholder</div>
 }

@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
 		reactCompiler: false,
 		optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
 	},
+	devIndicators: {
+		position: 'bottom-right',
+	},
 }
 
 export default pipe(nextConfig)

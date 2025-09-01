@@ -17,6 +17,9 @@ importers:
       '@mantine/hooks':
         specifier: 8.2.8
         version: 8.2.8(react@19.1.0)
+      '@neondatabase/serverless':
+        specifier: 1.0.1
+        version: 1.0.1
       '@orpc/client':
         specifier: 1.8.5
         version: 1.8.5
@@ -46,7 +49,7 @@ importers:
         version: 0.31.4
       drizzle-orm:
         specifier: 0.44.5
-        version: 0.44.5(kysely@0.28.5)(pg@8.16.3)
+        version: 0.44.5(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(kysely@0.28.5)(pg@8.16.3)
       geist:
         specifier: 1.4.2
         version: 1.4.2(next@15.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
@@ -742,6 +745,10 @@ packages:
     peerDependencies:
       react: ^18.x || ^19.x
 
+  '@neondatabase/serverless@1.0.1':
+    resolution: {integrity: sha512-O6yC5TT0jbw86VZVkmnzCZJB0hfxBl0JJz6f+3KHoZabjb/X08r9eFA+vuY06z1/qaovykvdkrXYq3SPUuvogA==}
+    engines: {node: '>=19.0.0'}
+
   '@next/env@15.5.2':
     resolution: {integrity: sha512-Qe06ew4zt12LeO6N7j8/nULSOe3fMXE4dM6xgpBQNvdzyK1sv5y4oAP3bq4LamrvGCZtmRYnW8URFCeX5nFgGg==}
 
@@ -1050,8 +1057,14 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
+  '@types/node@22.18.0':
+    resolution: {integrity: sha512-m5ObIqwsUp6BZzyiy4RdZpzWGub9bqLJMvZDD0QMXhxjqMHMENlj+SqF5QxoUwaQNFe+8kz8XM8ZQhqkQPTgMQ==}
+
   '@types/node@24.3.0':
     resolution: {integrity: sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==}
+
+  '@types/pg@8.15.5':
+    resolution: {integrity: sha512-LF7lF6zWEKxuT3/OR8wAZGzkg4ENGXFNyiV/JeOt9z5B+0ZVwbql9McqX5c/WStFq1GaGso7H1AzP/qSzmlCKQ==}
 
   '@types/react-dom@19.1.9':
     resolution: {integrity: sha512-qXRuZaOsAdXKFyOhRBg6Lqqc0yay13vN7KrIg4L7N4aaHN68ma9OK3NE1BoDFgFOTfM7zg+3/8+2n8rLUH3OKQ==}
@@ -2188,6 +2201,9 @@ packages:
   uncrypto@0.1.3:
     resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
 
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
   undici-types@7.10.0:
     resolution: {integrity: sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag==}
 
@@ -2717,6 +2733,11 @@ snapshots:
     dependencies:
       react: 19.1.0
 
+  '@neondatabase/serverless@1.0.1':
+    dependencies:
+      '@types/node': 22.18.0
+      '@types/pg': 8.15.5
+
   '@next/env@15.5.2': {}
 
   '@next/swc-darwin-arm64@15.5.2':
@@ -3015,9 +3036,19 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
+  '@types/node@22.18.0':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/node@24.3.0':
     dependencies:
       undici-types: 7.10.0
+
+  '@types/pg@8.15.5':
+    dependencies:
+      '@types/node': 24.3.0
+      pg-protocol: 1.10.3
+      pg-types: 2.2.0
 
   '@types/react-dom@19.1.9(@types/react@19.1.12)':
     dependencies:
@@ -3263,8 +3294,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.5(kysely@0.28.5)(pg@8.16.3):
+  drizzle-orm@0.44.5(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(kysely@0.28.5)(pg@8.16.3):
     optionalDependencies:
+      '@neondatabase/serverless': 1.0.1
+      '@types/pg': 8.15.5
       kysely: 0.28.5
       pg: 8.16.3
 
@@ -4007,6 +4040,8 @@ snapshots:
   typescript@5.9.2: {}
 
   uncrypto@0.1.3: {}
+
+  undici-types@6.21.0: {}
 
   undici-types@7.10.0: {}
 

@@ -6,19 +6,12 @@ import { admin } from 'better-auth/plugins'
 
 import { publicConfig } from '~/config/public-config'
 import { serverConfig } from '~/config/server-config'
-import { primaryDb } from '~/db'
+import { db } from '~/db'
 import * as schema from '~/db/models'
 
 export const auth = betterAuth({
 	plugins: [admin()],
-	account: {
-		accountLinking: {
-			enabled: true,
-			trustedProviders: ['discord', 'linkedin'],
-			allowDifferentEmails: true,
-		},
-	},
-	database: drizzleAdapter(primaryDb, {
+	database: drizzleAdapter(db, {
 		provider: 'pg',
 		schema: {
 			...schema,
