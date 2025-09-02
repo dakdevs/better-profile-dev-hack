@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { X } from 'lucide-react'
 
 import { useExpandNavigation, useNavigationState } from '~/atoms/navigation-atom'
@@ -15,14 +16,19 @@ export default function NavigationHeader() {
 
 	return (
 		<>
-			<h1 className="font-rakkas text-better-indigo text-3xl">
-				<TextMorph
-					transition={{ ease: 'easeInOut', duration: 0.2 }}
-					className="whitespace-nowrap"
-				>
-					{title}
-				</TextMorph>
-			</h1>
+			<Link
+				href="/"
+				className="cursor-pointer"
+			>
+				<h1 className="font-rakkas text-better-indigo text-3xl">
+					<TextMorph
+						transition={{ ease: 'easeInOut', duration: 0.2 }}
+						className="whitespace-nowrap"
+					>
+						{title}
+					</TextMorph>
+				</h1>
+			</Link>
 			<button
 				disabled={!navigationState}
 				onClick={() => {

@@ -7,9 +7,8 @@ export default function MatchesLayout({ children }: { children: ReactNode }) {
 		<PageContainer
 			title="Settings"
 			description="Manage your account settings"
-			bannerImage="/images/settings-banner.png"
+			bannerImage="/images/settings-banner-v2.png"
 			bannerImageClassName="object-bottom"
-			bannerPostion="right"
 		>
 			{children}
 		</PageContainer>

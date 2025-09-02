@@ -7,8 +7,10 @@ import type { auth } from './lib/auth'
 
 type Session = typeof auth.$Infer.Session
 
-const PROTECTED_PATHS = ['/profile', '/account']
-const isProtectedPath = (url: URL) => PROTECTED_PATHS.some((path) => url.pathname.startsWith(path))
+const PUBLIC_PATHS = ['/login', '/signup']
+function isPublicPath(url: URL) {
+	return PUBLIC_PATHS.some((path) => url.pathname.startsWith(path))
+}
 
 const getSession = cache(async function ({
 	origin,
@@ -28,7 +30,7 @@ const getSession = cache(async function ({
 })
 
 export async function middleware(request: NextRequest) {
-	if (isProtectedPath(request.nextUrl)) {
+	if (!isPublicPath(request.nextUrl)) {
 		const headersList = await headers()
 
 		const session = await getSession({

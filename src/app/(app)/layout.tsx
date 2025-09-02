@@ -32,8 +32,10 @@ export const metadata: Metadata = {
 
 const imagePreloads = [
 	'/images/interview-banner.png',
-	'/images/matches-banner.png',
-	'/images/settings-banner.png',
+	'/images/settings-banner-v2.png',
+	'/images/matches-banner-v2.png',
+	'/images/signup-bg.png',
+	'/images/bg-2.png',
 ]
 
 export default function RootLayout({
