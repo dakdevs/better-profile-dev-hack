@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Button } from '@mantine/core'
 
 export default function MatchesPage() {
@@ -9,6 +10,8 @@ export default function MatchesPage() {
 					variant="filled"
 					color="#1e3a8a"
 					radius="md"
+					component={Link}
+					href="/interview"
 				>
 					Interview
 				</Button>
