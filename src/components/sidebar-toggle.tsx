@@ -2,7 +2,7 @@
 
 import { ChevronsLeft, X } from 'lucide-react'
 
-import { useExpandNavigation, useNavigationState } from '~/atoms/navigation-atom'
+import { useExpandNavigation } from '~/atoms/navigation-atom'
 import { cn } from '~/utils/cn'
 
 export default function SidebarToggle({ displayOn }: { displayOn: 'expanded' | 'collapsed' }) {
@@ -18,7 +18,9 @@ export default function SidebarToggle({ displayOn }: { displayOn: 'expanded' | '
 			)}
 		>
 			<button
-				onClick={() => setExpandNavigation(!expandNavigation)}
+				onClick={() => {
+					setExpandNavigation(!expandNavigation)
+				}}
 				className="p-sm hidden aspect-square cursor-pointer rounded-md text-sm text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 md:flex md:items-center md:justify-center"
 			>
 				<ChevronsLeft

@@ -6,11 +6,10 @@ import { X } from 'lucide-react'
 import { useExpandNavigation, useNavigationState } from '~/atoms/navigation-atom'
 import SidebarToggle from '~/components/sidebar-toggle'
 import { TextMorph } from '~/components/text-morph'
-import { cn } from '~/utils/cn'
 
 export default function NavigationHeader() {
 	const [navigationState, setNavigationState] = useNavigationState()
-	const [expandNavigation, setExpandNavigation] = useExpandNavigation()
+	const [expandNavigation] = useExpandNavigation()
 
 	const title = expandNavigation ? 'Better Profile' : 'BP'
 

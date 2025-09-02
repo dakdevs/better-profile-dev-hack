@@ -1,15 +1,15 @@
 'use client'
 
-import { useId, useMemo } from 'react'
-import { AnimatePresence, motion, Transition, Variants } from 'motion/react'
+import { useId, useMemo, type CSSProperties, type ElementType } from 'react'
+import { AnimatePresence, motion, type Transition, type Variants } from 'motion/react'
 
 import { cn } from '~/utils/cn'
 
-export type TextMorphProps = {
+type TextMorphProps = {
 	children: string
-	as?: React.ElementType
+	as?: ElementType
 	className?: string
-	style?: React.CSSProperties
+	style?: CSSProperties
 	variants?: Variants
 	transition?: Transition
 }
