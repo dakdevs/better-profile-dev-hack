@@ -32,7 +32,7 @@ export function TextMorph({
 			charCounts[lowerChar] = (charCounts[lowerChar] || 0) + 1
 
 			return {
-				id: `${uniqueId}-${lowerChar}${charCounts[lowerChar]}`,
+				id: `${uniqueId}-${lowerChar}${String(charCounts[lowerChar])}`,
 				label: char === ' ' ? '\u00A0' : char,
 			}
 		})

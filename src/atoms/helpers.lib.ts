@@ -2,16 +2,14 @@ import { atom, WritableAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
 export function atomWithToggleAndStorage(
-	key: string,
-	initialValue?: boolean,
-	storage?: any,
+	...params: Parameters<typeof atomWithStorage>
 ): WritableAtom<boolean, [boolean?], void> {
-	const anAtom = atomWithStorage(key, initialValue, storage)
+	const anAtom = atomWithStorage(...params)
 	const derivedAtom = atom(
 		(get) => get(anAtom),
 		(get, set, nextValue?: boolean) => {
 			const update = nextValue ?? !get(anAtom)
-			void set(anAtom, update)
+			set(anAtom, update)
 		},
 	)
 

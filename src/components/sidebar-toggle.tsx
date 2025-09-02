@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronsLeft, X } from 'lucide-react'
+import { ChevronsLeft } from 'lucide-react'
 
 import { useExpandNavigation } from '~/atoms/navigation-atom'
 import { cn } from '~/utils/cn'

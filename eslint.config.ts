@@ -137,7 +137,6 @@ export default tseslint.config(
 					varsIgnorePattern: '^_',
 				},
 			],
-			'local-rules/no-any-except-in-generics': 'error',
 			'@typescript-eslint/no-explicit-any': 'off',
 		},
 	},
@@ -204,6 +203,7 @@ export default tseslint.config(
 			'src/**/*.lib.tsx',
 		],
 		rules: {
+			'local-rules/no-any-except-in-generics': 'error',
 			'no-restricted-syntax': [
 				'error',
 				{
