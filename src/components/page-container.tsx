@@ -44,7 +44,7 @@ export default function PageContainer({
 			<div className="px-lg py-md gap-md flex flex-1">
 				<div className="flex flex-1">{children}</div>
 				{bannerImage && bannerPostion === 'right' ? (
-					<div className="px-md flex w-48">
+					<div className="flex w-48">
 						<div className="relative w-full flex-1">
 							<Image
 								src={bannerImage}
