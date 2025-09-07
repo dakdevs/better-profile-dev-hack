@@ -70,13 +70,15 @@ export default function RootLayout({
 			</head>
 			<TanstackQueryClientProvider>
 				<body className="h-full font-sans">
-					<Provider>
-						<MantineProvider
-							theme={{ fontFamily: 'var(--font-sans), Helvetica, Arial, sans-serif' }}
-						>
-							{children}
-						</MantineProvider>
-					</Provider>
+					<div className="root isolate h-full">
+						<Provider>
+							<MantineProvider
+								theme={{ fontFamily: 'var(--font-sans), Helvetica, Arial, sans-serif' }}
+							>
+								{children}
+							</MantineProvider>
+						</Provider>
+					</div>
 				</body>
 			</TanstackQueryClientProvider>
 		</html>

@@ -9,6 +9,7 @@
 - **PostgreSQL** with Neon serverless
 - **Drizzle ORM** for database operations and migrations
 - **Snake case** naming convention for database schema
+- **Push-based migrations** - Use `pnpm db:push` instead of traditional migrations. Never worry about generating or managing migration files manually.
 
 ## Authentication
 - **Better Auth** for authentication system
@@ -20,6 +21,8 @@
 - **TanStack Query** for server state management
 - **Jotai** for client-side state management
 - **TanStack Form** for form handling
+
+> **Note**: See `api-patterns.md` for detailed oRPC controller patterns and guidelines
 
 ## UI & Styling
 - **Tailwind CSS 4.1.12** for styling
@@ -46,10 +49,12 @@ pnpm dev-migrate      # Push database changes
 
 ### Database Operations
 ```bash
-pnpm db:generate      # Generate migration files
-pnpm db:push          # Push schema changes to database
-pnpm db:migrate       # Run pending migrations
+pnpm db:push          # Push schema changes to database (primary workflow)
+pnpm db:generate      # Generate migration files (rarely needed)
+pnpm db:migrate       # Run pending migrations (rarely needed)
 ```
+
+**Database Workflow**: This project uses Drizzle's push-based workflow. Simply modify your schema files and run `pnpm db:push` to sync changes to the database. Traditional migration files are auto-managed and you should never need to create or modify them manually.
 
 ### Code Quality
 ```bash
@@ -66,10 +71,26 @@ pnpm start            # Start production server
 pnpm vercel-build     # Build for Vercel deployment
 ```
 
+### Testing & Validation
+```bash
+pnpm tsc --noEmit     # Type check without building (preferred for validation)
+pnpm test             # Run vitest tests
+```
+
+**Important**: Never use `pnpm build` to test if the application is sound. Instead:
+- Use `pnpm tsc --noEmit` for type checking and validation
+- Use vitest tests for functionality testing
+- Building is only for production deployment, not for testing
+
 ### Docker
 ```bash
 pnpm docker:up        # Start Docker services
 ```
+
+## Component Organization
+- **Never create `_components` folders** - Use `_modules` instead
+- **`_modules/` folders** - For components localized to specific areas of the codebase
+- **`src/components/` folder** - For globally reusable components across the application
 
 ## Environment Configuration
 - Uses `@t3-oss/env-nextjs` for type-safe environment variables

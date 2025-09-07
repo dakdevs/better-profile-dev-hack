@@ -1,5 +1,5 @@
-import ping from './controllers/ping'
+import controllers from './controllers'
 
 export const router = {
-	ping,
+	...controllers,
 }

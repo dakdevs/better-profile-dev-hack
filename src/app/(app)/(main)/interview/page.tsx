@@ -1,3 +1,9 @@
-export default function InterviewPage() {
-	return <div>{'Interview'}</div>
+import ChatContainer from './_modules/chat/chat-container'
+
+export default async function InterviewPage() {
+	return (
+		<div className="size-full">
+			<ChatContainer />
+		</div>
+	)
 }

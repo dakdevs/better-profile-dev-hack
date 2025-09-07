@@ -5,13 +5,17 @@ export const isDevelopment = process.env.NODE_ENV !== 'production'
 
 export const env = createEnv({
 	client: {
-		NEXT_PUBLIC_APP_HOST: isDevelopment ? z.url().default('http://localhost:3000') : z.url(),
+		NEXT_PUBLIC_APP_HOST: isDevelopment
+			? z.string().url().default('http://localhost:3000')
+			: z.string().url(),
 	},
 	server: {
 		NODE_ENV: z.string().default('development'),
 		BETTER_AUTH_SECRET: z.string(),
 		GOOGLE_CLIENT_ID: z.string(),
 		GOOGLE_CLIENT_SECRET: z.string(),
+		OPENAI_API_KEY: z.string(),
+		OPENROUTER_API_KEY: z.string(),
 		DATABASE_URL: isDevelopment
 			? z.string().default('postgresql://betterprofile:betterprofile@localhost:5432/betterprofile')
 			: z.string(),
@@ -23,6 +27,8 @@ export const env = createEnv({
 		BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
 		GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 		GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+		OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
 	},
 	emptyStringAsUndefined: true,
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,

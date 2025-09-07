@@ -7,8 +7,6 @@ export default function InterviewLayout({ children }: { children: ReactNode }) {
 		<PageContainer
 			title="Interview"
 			description="Conduct interviews to create a living, verifiable profile"
-			bannerImage="/images/interview-banner.png"
-			bannerImageClassName="object-top"
 		>
 			{children}
 		</PageContainer>
