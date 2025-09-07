@@ -14,6 +14,15 @@
 	--spacing-2xl: 8rem;
 	--spacing-3xl: 16rem;
 
+	--color-better-indigo-100: #eef2fb;
+	--color-better-indigo-200: #dae0f1;
+	--color-better-indigo-300: #b1bee5;
+	--color-better-indigo-400: #859adb;
+	--color-better-indigo-500: #617bd1;
+	--color-better-indigo-600: #4b68cc;
+	--color-better-indigo-700: #3f5fcb;
+	--color-better-indigo-800: #324fb4;
+	--color-better-indigo-900: #2a46a1;
 	--color-better-indigo: #1e3a8a;
 }
 

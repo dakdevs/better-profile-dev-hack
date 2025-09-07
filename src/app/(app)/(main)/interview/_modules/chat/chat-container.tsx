@@ -33,7 +33,7 @@ export default function ChatContainer() {
 
 	return (
 		<div className="flex h-full w-full flex-col">
-			<ChatContent />
+			<ChatContent messages={messages} />
 			<ChatInput />
 		</div>
 	)

@@ -1,8 +1,8 @@
 import { Agent } from '@mastra/core'
 
-import { openrouter } from '~/ai/lib/openrouter'
+import { vercel } from '~/ai/lib/vercel'
 
-const MODEL = openrouter('google/gemini-2.5-flash')
+const MODEL = vercel('google/gemini-2.5-flash')
 
 const NAME = 'Career Interviewer'
 
