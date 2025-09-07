@@ -2,7 +2,7 @@ import { Agent } from '@mastra/core'
 
 import { vercel } from '~/ai/lib/vercel'
 
-const MODEL = vercel('google/gemini-2.5-flash')
+const MODEL = vercel('openai/gpt-5-nano')
 
 const NAME = 'Career Interviewer'
 

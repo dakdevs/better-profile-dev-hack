@@ -10,7 +10,7 @@ import ChatContent from './chat-content'
 import ChatInput from './chat-input'
 
 export default function ChatContainer() {
-	const { mutateAsync: sendChatMessage } = useMutation(
+	const { mutateAsync: sendChatMessage, isPending } = useMutation(
 		orpcClient.interview.sendMessage.mutationOptions(),
 	)
 
@@ -31,10 +31,21 @@ export default function ChatContainer() {
 		},
 	})
 
+	const isLoading = (status !== 'ready' && status !== 'error') || isPending
+
 	return (
-		<div className="flex h-full w-full flex-col">
-			<ChatContent messages={messages} />
-			<ChatInput />
+		<div className="flex flex-1 flex-col">
+			<div className="flex-1 overflow-y-auto">
+				<ChatContent messages={messages} />
+			</div>
+			<ChatInput
+				isLoading={isLoading}
+				onSubmit={(message) => {
+					void sendMessage({
+						text: message,
+					})
+				}}
+			/>
 		</div>
 	)
 }

@@ -39,7 +39,7 @@ export default function PageContainer({
 					</div>
 				</div>
 			) : null}
-			<div className="p-lg gap-md flex flex-1 overflow-y-auto">{children}</div>
+			<div className="p-lg gap-md flex flex-1 flex-col overflow-y-auto">{children}</div>
 		</div>
 	)
 }
