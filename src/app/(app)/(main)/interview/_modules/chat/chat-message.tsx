@@ -18,7 +18,20 @@ export default function ChatMessage({ message }: { message: UIMessage }) {
 				)}
 			>
 				{message.parts.map((part, index) =>
-					part.type === 'text' ? <Streamdown key={`part-${index}`}>{part.text}</Streamdown> : null,
+					part.type === 'text' ? (
+						isUser ? (
+							part.text
+						) : (
+							<Streamdown
+								key={`part-${index}`}
+								components={{
+									p: ({ children }) => <p className="mb-sm">{children}</p>,
+								}}
+							>
+								{part.text}
+							</Streamdown>
+						)
+					) : null,
 				)}
 			</div>
 		</div>
