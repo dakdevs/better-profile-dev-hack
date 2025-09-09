@@ -14,3 +14,4 @@ export * from './jobs';
 export * from './interviews';
 export * from './skills';
 export * from './embeddings';
+export * from './matches';
