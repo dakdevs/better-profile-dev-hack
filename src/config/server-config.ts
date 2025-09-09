@@ -16,4 +16,7 @@ export const serverConfig = {
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
 		},
 	},
+	ai: {
+		openRouterApiKey:env.OPENROUTER_API_KEY,
+	},
 }

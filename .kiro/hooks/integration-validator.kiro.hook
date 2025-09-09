@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "name": "Integration Validator",
+  "description": "Monitors for new components and files being added to ensure they follow project conventions, are properly integrated with the tech stack, and are tested within the application scope",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/components/**/*.tsx",
+      "src/app/**/*.tsx",
+      "src/orpc/controllers/**/*.ts",
+      "src/db/models/**/*.ts",
+      "src/lib/**/*.ts",
+      "src/utils/**/*.ts",
+      "src/atoms/**/*.ts",
+      "src/services/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "New files have been added to the project. Please review them to ensure they:\n\n1. Follow the project's naming conventions (kebab-case for files, PascalCase for components)\n2. Use the correct tech stack patterns (TanStack Form for forms, Mantine + Tailwind for UI, oRPC for API)\n3. Import from the correct paths using the ~/src alias\n4. Follow the component organization rules (_modules for local components, src/components for global)\n5. Use the custom spacing system and design tokens\n6. Are properly integrated with existing authentication, database, and state management\n7. Include proper TypeScript types without interfaces\n8. Are testable and follow the established patterns\n\nProvide specific feedback on any issues found and suggest corrections to ensure the integrated components work seamlessly within this Next.js application."
+  }
+}
