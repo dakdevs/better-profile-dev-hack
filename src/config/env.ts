@@ -17,6 +17,7 @@ export const env = createEnv({
 		OPENAI_API_KEY: z.string(),
 		OPENROUTER_API_KEY: z.string(),
 		HUGGINGFACE_API_TOKEN: z.string(),
+		CAL_API_KEY: z.string(),
 		DATABASE_URL: isDevelopment
 			? z.string().default('postgresql://betterprofile:betterprofile@localhost:5432/betterprofile')
 			: z.string(),
@@ -31,6 +32,7 @@ export const env = createEnv({
 		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 		OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
 		HUGGINGFACE_API_TOKEN: process.env.HUGGINGFACE_API_TOKEN,
+		CAL_API_KEY: process.env.CAL_API_KEY,
 	},
 	emptyStringAsUndefined: true,
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,
