@@ -1,5 +1,3 @@
-// src/lib/utils.ts
-
 /**
  * Generates a simple, time-sortable, and reasonably unique ID.
  * Format: [prefix]_[timestamp_in_base36][random_part]

@@ -1,4 +1,3 @@
-// src/db/models/jobs.ts
 import { pgTable, text, timestamp, boolean, jsonb, integer, decimal, index } from 'drizzle-orm/pg-core';
 import { recruiterProfiles } from './recruiter';
 

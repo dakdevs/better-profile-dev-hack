@@ -1,4 +1,3 @@
-// src/db/models/matches.ts
 import { pgTable, text, decimal, jsonb, index, uuid } from 'drizzle-orm/pg-core';
 import { jobPostings } from './jobs';
 import { users } from './users';

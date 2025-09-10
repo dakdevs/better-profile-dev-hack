@@ -1,4 +1,3 @@
-// src/db/models/embeddings.ts
 import { pgTable, text, timestamp, vector, index, bigserial, integer, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { interviewSessions } from './interviews';

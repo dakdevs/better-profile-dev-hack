@@ -1,4 +1,3 @@
-// src/db/models/recruiter.ts
 import { pgTable, text, timestamp, boolean, integer, index, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 

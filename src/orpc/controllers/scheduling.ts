@@ -1,5 +1,3 @@
-// src/orpc/controllers/scheduling.ts
-
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
 import { protectedBase } from '~/orpc/middleware/bases';
@@ -7,10 +5,6 @@ import { CalComService, CalComUser, CalComSchedule } from '~/services/cal-com';
 import { db } from '~/db';
 import { recruiterProfiles } from '~/db/models';
 import { eq } from 'drizzle-orm';
-
-// src/orpc/controllers/scheduling.ts
-
-// ... (imports and other procedures remain the same) ...
 
 /**
  * Creates a new booking (schedules an interview).
@@ -64,8 +58,6 @@ createBooking: protectedBase
 
 		return booking;
 	}),
-
-// ... (the rest of the file remains the same) ...
 
 export const scheduling = {
 	/**

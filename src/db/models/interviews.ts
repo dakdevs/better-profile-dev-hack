@@ -1,4 +1,3 @@
-// src/db/models/interviews.ts
 import { pgTable, text, timestamp, jsonb, index, integer, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 

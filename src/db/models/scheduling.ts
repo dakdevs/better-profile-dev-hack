@@ -1,4 +1,3 @@
-// src/db/models/scheduling.ts
 import { pgTable, text, timestamp, boolean, jsonb, index, integer, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { jobPostings } from './jobs';

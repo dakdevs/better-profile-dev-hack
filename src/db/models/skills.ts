@@ -1,4 +1,3 @@
-// src/db/models/skills.ts
 import { pgTable, text, timestamp, index, integer, bigserial, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { interviewSessions } from './interviews';

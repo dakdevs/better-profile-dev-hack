@@ -1,5 +1,3 @@
-// src/utils/embeddings.ts
-
 const HUGGINGFACE_MODEL_ID = 'BAAI/bge-base-en-v1.5';
 const HUGGINGFACE_API_URL = `https://api-inference.huggingface.co/models/${HUGGINGFACE_MODEL_ID}`;
 

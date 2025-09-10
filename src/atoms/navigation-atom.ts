@@ -1,5 +1,3 @@
-// ~/src/atoms/navigation-atom.ts
-
 import { atom, useAtom } from 'jotai'
 
 import { atomWithToggleAndStorage } from './helpers.lib'

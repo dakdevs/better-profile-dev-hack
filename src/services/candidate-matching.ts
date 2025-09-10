@@ -1,4 +1,3 @@
-// src/services/candidate-matching.ts
 import { db } from '~/db';
 import { userSkills, users, jobPostings, candidateJobMatches } from '~/db/models';
 import { eq, and, sql, desc } from 'drizzle-orm';

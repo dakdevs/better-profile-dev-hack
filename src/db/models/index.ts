@@ -1,7 +1,3 @@
-
-
-// src/db/models/index.ts
-
 export * from './accounts';
 export * from './interview-messages';
 export * from './sessions';

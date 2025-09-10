@@ -1,5 +1,3 @@
-// src/types/interview-management.ts
-
 // --- Core Types ---
 export type SkillCategory = 'technical' | 'soft' | 'domain' | 'language' | 'certification';
 export type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'executive' | 'intern';
