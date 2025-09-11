@@ -3,8 +3,10 @@ import interview from './interview'
 import ping from './ping'
 import recruiter from './recruiter'
 
-export default {
+const controllers = {
 	ping,
 	interview,
 	recruiter,
-}
+} as const
+
+export default controllers

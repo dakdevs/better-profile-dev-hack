@@ -1,45 +1,32 @@
-import { db } from '~/db';
-import { userSkills, users, jobPostings, candidateJobMatches } from '~/db/models';
-import { eq, and, sql, desc } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
-// Note: We will create the files for these missing imports in the next step.
-// import {
-//   CandidateWithMatch,
-//   CandidateFilters,
-//   Skill,
-//   OverallFit,
-//   JobPosting,
-//   CandidateJobMatch
-// } from '~/types/interview-management';
+// src/services/candidate-matching.ts
+import type {
+	CandidateWithMatch,
+	CandidateWithSkills,
+	MatchDetails,
+} from '~/types/internal/candidates'
+import type { JobPosting } from '~/types/internal/jobs'
+import type { OverallFit, Skill } from '~/types/public'
 
-// --- Placeholder Types (to be replaced) ---
-type JobPosting = any;
-type CandidateWithSkills = any;
-type Skill = any;
-type SkillMatchResult = any;
-type OverallFit = 'excellent' | 'good' | 'fair' | 'poor';
-type CandidateWithMatch = any;
-type CandidateJobMatch = any;
+interface SkillMatchResult extends MatchDetails {
+	matchScore: number
+}
 
 export class CandidateMatchingService {
 	/**
 	 * Calculate match score and details for a specific candidate and job
 	 */
-	async calculateCandidateMatch(
+	calculateCandidateMatch(
 		candidate: CandidateWithSkills,
-		jobPosting: JobPosting
-	): Promise<CandidateWithMatch> {
-		const requiredSkills = (jobPosting.requiredSkills as Skill[]) || [];
-		const preferredSkills = (jobPosting.preferredSkills as Skill[]) || [];
+		jobPosting: JobPosting,
+	): CandidateWithMatch {
+		// @ts-expect-error - Default values for potentially undefined arrays
+		const requiredSkills: Skill[] = jobPosting.requiredSkills ?? []
+		const preferredSkills: Skill[] = jobPosting.preferredSkills ?? []
 
 		// Calculate skill matches
-		const matchResult = this.calculateSkillMatch(
-			candidate.skills,
-			requiredSkills,
-			preferredSkills
-		);
+		const matchResult = this.calculateSkillMatch(candidate.skills, requiredSkills, preferredSkills)
 
-		const result = {
+		return {
 			candidate,
 			match: {
 				score: matchResult.matchScore,
@@ -48,11 +35,9 @@ export class CandidateMatchingService {
 				overallFit: matchResult.overallFit,
 				availability: [], // Placeholder
 			},
-		};
+		}
 
-		// We can add caching back later
-		// await cache.set(cacheKey, result, cacheTTL.medium);
-		return result;
+		// Nothing to return here - this code is now unreachable
 	}
 
 	/**
@@ -61,62 +46,78 @@ export class CandidateMatchingService {
 	private calculateSkillMatch(
 		candidateSkills: Skill[],
 		requiredSkills: Skill[],
-		preferredSkills: Skill[]
+		preferredSkills: Skill[],
 	): SkillMatchResult {
 		const candidateSkillMap = new Map(
-			candidateSkills.map(skill => [skill.name.toLowerCase().trim(), skill])
-		);
+			candidateSkills.map((skill) => [skill.name.toLowerCase().trim(), skill]),
+		)
 
 		const findSkillMatch = (jobSkill: Skill): Skill | null => {
-			const jobSkillName = jobSkill.name.toLowerCase().trim();
-			if (candidateSkillMap.has(jobSkillName)) {
-				return candidateSkillMap.get(jobSkillName)!;
+			const jobSkillName = jobSkill.name.toLowerCase().trim()
+			const skill = candidateSkillMap.get(jobSkillName)
+			if (skill) {
+				return skill
 			}
 			// Simplified fuzzy matching for now
 			for (const [candidateSkillName, candidateSkill] of candidateSkillMap) {
-				if (candidateSkillName.includes(jobSkillName) || jobSkillName.includes(candidateSkillName)) {
-					return candidateSkill;
+				if (
+					candidateSkillName.includes(jobSkillName)
+					|| jobSkillName.includes(candidateSkillName)
+				) {
+					return candidateSkill
 				}
 			}
-			return null;
-		};
+			return null
+		}
 
-		const matchingRequired = requiredSkills.filter(findSkillMatch);
-		const matchingPreferred = preferredSkills.filter(findSkillMatch);
-		const skillGaps = requiredSkills.filter(skill => !findSkillMatch(skill));
+		const matchingRequired = requiredSkills.filter(findSkillMatch)
+		const matchingPreferred = preferredSkills.filter(findSkillMatch)
+		const skillGaps = requiredSkills.filter((skill) => !findSkillMatch(skill))
 
-		const requiredScore = requiredSkills.length > 0
-			? (matchingRequired.length / requiredSkills.length) * 100
-			: 100;
+		const requiredScore =
+			requiredSkills.length > 0 ? (matchingRequired.length / requiredSkills.length) * 100 : 100
 
-		const preferredScore = preferredSkills.length > 0
-			? (matchingPreferred.length / preferredSkills.length) * 100
-			: 0;
+		const preferredScore =
+			preferredSkills.length > 0 ? (matchingPreferred.length / preferredSkills.length) * 100 : 0
 
 		// Simplified scoring for now, can add proficiency weighting back later
-		const finalScore = Math.round((requiredScore * 0.7) + (preferredScore * 0.3));
+		const finalScore = Math.round(requiredScore * 0.7 + preferredScore * 0.3)
 
 		return {
 			matchingSkills: [...matchingRequired, ...matchingPreferred],
-			skillGaps,
+			score: finalScore,
 			matchScore: Math.min(100, Math.max(0, finalScore)),
+			skillGaps,
 			overallFit: this.determineOverallFit(finalScore),
-		};
+			availability: [], // To be implemented later
+		}
 	}
 
 	/**
 	 * Determine overall fit category based on match score
 	 */
 	private determineOverallFit(matchScore: number): OverallFit {
-		if (matchScore >= 80) return 'excellent';
-		if (matchScore >= 60) return 'good';
-		if (matchScore >= 40) return 'fair';
-		return 'poor';
+		if (matchScore >= 80) return 'excellent'
+		if (matchScore >= 60) return 'good'
+		if (matchScore >= 40) return 'fair'
+		return 'poor'
 	}
 
-	// --- Other methods from the original file can be added back one by one ---
-	// For now, the core `calculateCandidateMatch` is the most important.
+	/**
+	 * Find matching candidates for a job posting with their respective match scores
+	 */
+	findMatchingCandidates(
+		candidates: CandidateWithSkills[],
+		jobPosting: JobPosting,
+	): CandidateWithMatch[] {
+		const matches = candidates.map((candidate) =>
+			this.calculateCandidateMatch(candidate, jobPosting),
+		)
+
+		// Sort by match score in descending order
+		return matches.sort((a, b) => (b.match.score || 0) - (a.match.score || 0))
+	}
 }
 
 // Export singleton instance
-export const candidateMatchingService = new CandidateMatchingService();
+export const candidateMatchingService = new CandidateMatchingService()

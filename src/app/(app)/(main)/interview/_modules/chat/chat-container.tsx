@@ -14,7 +14,11 @@ export default function ChatContainer() {
 		orpcClient.interview.sendMessage.mutationOptions(),
 	)
 
-	const { messages, sendMessage, status } = useChat({
+	const {
+		messages: _messages,
+		sendMessage: _sendMessage,
+		status: _status,
+	} = useChat({
 		resume: true,
 		transport: {
 			async sendMessages(options) {
@@ -25,7 +29,7 @@ export default function ChatContainer() {
 					}),
 				)
 			},
-			reconnectToStream(options) {
+			reconnectToStream(_options) {
 				throw new Error('Not implemented')
 			},
 		},

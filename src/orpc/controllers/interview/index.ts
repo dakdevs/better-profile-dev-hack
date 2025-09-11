@@ -1,7 +1,9 @@
 import getMessage from './get-message'
 import sendMessage from './send-message'
 
-export default {
+const interviewControllers = {
 	getMessage,
 	sendMessage,
-}
+} as const
+
+export default interviewControllers

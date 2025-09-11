@@ -1,0 +1,3 @@
+// Ignore type definitions
+src/types/**/*
+**/types/**/*

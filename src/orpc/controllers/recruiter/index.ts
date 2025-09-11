@@ -1,7 +1,10 @@
+// src/orpc/controllers/recruiter/index.ts
 import { jobs } from './jobs'
-import { matching} from './matching'
+import { matching } from './matching'
 
-export default {
+const recruiterControllers = {
 	jobs,
 	matching,
-}
+} as const
+
+export default recruiterControllers
