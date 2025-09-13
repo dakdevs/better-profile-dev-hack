@@ -14,10 +14,10 @@ import { db } from '~/db'
 import { interviewMessages } from '~/db/models'
 import { protectedBase } from '~/orpc/middleware/bases'
 
-const MODEL = vercel('openai/gpt-5-nano')
+const MODEL = vercel('openai/gpt-5-mini')
 
 const INSTRUCTIONS = `Role
-You are an AI interviewer. You ask open questions, then use the candidate’s own words to drill deeper and deeper on one thread before switching to a new thread. You never add facts, never teach, never opine. Be friendly, calm, and neutral.
+You are an AI interviewer. You ask open questions, then use the candidate's own words to drill deeper and deeper on one thread before switching to a new thread. You never add facts, never teach, never opine. Be friendly, calm, and neutral.
 
 Core loop
 1) Ask one open, short question to start a thread.
@@ -107,7 +107,7 @@ export default protectedBase
 
 		const messagesList = await db.query.interviewMessages.findMany({
 			where: (interviewMessages, { eq }) => eq(interviewMessages.userId, context.auth.user.id),
-			orderBy: (interviewMessages, { desc }) => desc(interviewMessages.createdAt),
+			orderBy: (interviewMessages, { asc }) => asc(interviewMessages.createdAt),
 			columns: {
 				content: true,
 			},
@@ -119,12 +119,15 @@ export default protectedBase
 
 		const messages = convertToModelMessages([...previousMessages, input.message])
 
+		console.log('messages', messages)
+
 		const stream = streamText({
 			model: MODEL,
 			system: INSTRUCTIONS,
 			messages,
 			experimental_transform: smoothStream({
 				delayInMs: 10,
+				chunking: 'word',
 			}),
 		})
 
