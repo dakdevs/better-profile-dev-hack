@@ -19,8 +19,8 @@ export const candidateJobMatches = pgTable(
 		skillGaps: jsonb('skill_gaps'),
 		overallFit: text('overall_fit'),
 	},
-	[
-		index('candidate_job_matches_job_posting_idx').on(['job_posting_id']),
-		index('candidate_job_matches_candidate_idx').on(['candidate_id']),
+	(table) => [
+		index('candidate_job_matches_job_posting_idx').on(table.jobPostingId),
+		index('candidate_job_matches_candidate_idx').on(table.candidateId),
 	],
 )

@@ -35,11 +35,11 @@ export const jobPostings = pgTable(
 		createdAt: timestamp('created_at').notNull().defaultNow(),
 		updatedAt: timestamp('updated_at').notNull().defaultNow(),
 	},
-	[
-		index('job_postings_recruiter_idx').on(['recruiter_id']),
-		index('job_postings_status_idx').on(['status']),
-		index('job_postings_title_idx').on(['title']),
-		index('job_postings_location_idx').on(['location']),
-		index('job_postings_experience_level_idx').on(['experience_level']),
+	(table) => [
+		index('job_postings_recruiter_idx').on(table.recruiterId),
+		index('job_postings_status_idx').on(table.status),
+		index('job_postings_title_idx').on(table.title),
+		index('job_postings_location_idx').on(table.location),
+		index('job_postings_experience_level_idx').on(table.experienceLevel),
 	],
 )

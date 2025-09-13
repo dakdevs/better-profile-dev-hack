@@ -17,7 +17,7 @@ import { users } from './users'
 export const embeddings = pgTable(
 	'embeddings',
 	{
-		id: bigserial('id').primaryKey(),
+		id: bigserial('id', { mode: 'number' }).primaryKey(),
 		userId: uuid('user_id')
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),
@@ -27,7 +27,8 @@ export const embeddings = pgTable(
 		messageIndex: integer('message_index'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 	},
-	{
-		embeddingIdx: index('embeddings_embedding_idx').on('embedding vector_cosine_ops hnsw'),
-	},
+	(table) => [
+		index('embeddings_user_id_idx').on(table.userId),
+		index('embeddings_session_id_idx').on(table.sessionId),
+	],
 )

@@ -2,7 +2,7 @@ name: betterprofile-dev
 
 services:
   postgres:
-    image: pgvector/pgvector
+    image: pgvector/pgvector:pg16
     command: '-d 1'
     ports:
       - '5432:5432'

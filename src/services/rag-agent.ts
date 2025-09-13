@@ -161,7 +161,7 @@ export class InterviewRAGAgent {
 		const contextText =
 			context.length > 0 ? `Previous conversation context:\n${context.join('\n---\n')}\n\n` : ''
 
-		const enhancedPrompt = `${contextText}Current user input: ${userQuery}\n\nRespond as an experienced interviewer, maintaining conversation flow and referencing previous context when relevant.`
+		const enhancedPrompt = `${contextText}Current user query: ${userQuery}`
 
 		console.log('📝 Enhanced prompt structure:')
 		console.log(`  📚 Context pieces: ${String(context.length)}`)

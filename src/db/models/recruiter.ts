@@ -24,9 +24,9 @@ export const recruiterProfiles = pgTable(
 		createdAt: timestamp('created_at').notNull().defaultNow(),
 		updatedAt: timestamp('updated_at').notNull().defaultNow(),
 	},
-	[
-		index('recruiter_profiles_user_idx').on(['user_id']),
-		index('recruiter_profiles_organization_idx').on(['organization_name']),
-		index('recruiter_profiles_cal_com_user_idx').on(['cal_com_user_id']),
+	(table) => [
+		index('recruiter_profiles_user_idx').on(table.userId),
+		index('recruiter_profiles_organization_idx').on(table.organizationName),
+		index('recruiter_profiles_cal_com_user_idx').on(table.calComUserId),
 	],
 )

@@ -13,6 +13,10 @@
 		"test": "vitest",
 		"test:run": "vitest run",
 		"test:ui": "vitest --ui",
+		"test:watch": "vitest --watch",
+		"test:coverage": "vitest run --coverage",
+		"test:verbose": "vitest --reporter=verbose",
+		"test:ci": "vitest run --reporter=json --outputFile=test-results.json",
 		"lint": "eslint .",
 		"lint:prettier": "prettier --check .",
 		"fix:prettier": "prettier . --write",
@@ -21,6 +25,7 @@
 		"db:migrate": "dotenv -e .env.local -- drizzle-kit migrate",
 		"db:push": "dotenv -e .env.local -- drizzle-kit push",
 		"docker:up": "docker-compose up",
+		"docker:up-linux": "docker compose up",
 		"vercel-build": "bash ./scripts/deploy.sh && pnpm build"
 	},
 	"dependencies": {
