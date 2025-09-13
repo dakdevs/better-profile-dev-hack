@@ -19,11 +19,7 @@ import {
 import { domAnimation, LazyMotion, MotionConfig } from 'motion/react'
 import * as m from 'motion/react-m'
 
-import {
-	ComposerAddAttachment,
-	ComposerAttachments,
-	UserMessageAttachments,
-} from '~/components/assistant-ui/attachment'
+import { ComposerAttachments, UserMessageAttachments } from '~/components/assistant-ui/attachment'
 import { MarkdownText } from '~/components/assistant-ui/markdown-text'
 import { ToolFallback } from '~/components/assistant-ui/tool-fallback'
 import { TooltipIconButton } from '~/components/assistant-ui/tooltip-icon-button'
@@ -104,7 +100,7 @@ function ThreadWelcome() {
 	)
 }
 
-function ThreadWelcomeSuggestions() {
+function _ThreadWelcomeSuggestions() {
 	return (
 		<div className="aui-thread-welcome-suggestions grid w-full gap-2 @md:grid-cols-2">
 			{[
@@ -253,7 +249,7 @@ function AssistantMessage() {
 	)
 }
 
-function AssistantActionBar() {
+function _AssistantActionBar() {
 	return (
 		<ActionBarPrimitive.Root
 			hideWhenRunning
@@ -296,7 +292,7 @@ function UserMessage() {
 	)
 }
 
-function UserActionBar() {
+function _UserActionBar() {
 	return (
 		<ActionBarPrimitive.Root
 			hideWhenRunning
@@ -315,7 +311,7 @@ function UserActionBar() {
 	)
 }
 
-function EditComposer() {
+function _EditComposer() {
 	return (
 		<div className="aui-edit-composer-wrapper mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 px-2 first:mt-4">
 			<ComposerPrimitive.Root className="aui-edit-composer-root bg-muted ml-auto flex w-full max-w-7/8 flex-col rounded-xl">

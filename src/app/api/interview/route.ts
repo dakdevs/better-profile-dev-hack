@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
 	const messages = await getMessages(session.user.id)
 
-	const { message: newUserMessage }: { message: UIMessage } = await request.json()
+	const { message: newUserMessage } = (await request.json()) as { message: UIMessage }
 	await saveMessage(session.user.id, newUserMessage)
 
 	const result = streamText({
