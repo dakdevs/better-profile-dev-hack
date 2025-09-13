@@ -20,8 +20,7 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "docker:up": "docker-compose up",
-    "docker:up-linux": "docker compose up",
+    "docker:up": "docker compose up",
     "vercel-build": "bash ./scripts/deploy.sh && pnpm build"
   },
   "dependencies": {
