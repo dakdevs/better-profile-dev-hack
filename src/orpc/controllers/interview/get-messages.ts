@@ -5,14 +5,16 @@ import { protectedBase } from '~/orpc/middleware/bases'
 
 export default protectedBase
 	.input(
-		z.object({
-			cursor: z
-				.object({
-					createdAt: z.date(),
-					id: z.string().uuid(),
-				})
-				.optional(),
-		}),
+		z
+			.object({
+				cursor: z
+					.object({
+						createdAt: z.date(),
+						id: z.string().uuid(),
+					})
+					.optional(),
+			})
+			.default({}),
 	)
 	.handler(async function ({ input, context }) {
 		const { cursor } = input
@@ -40,6 +42,6 @@ export default protectedBase
 		})
 
 		return {
-			message: conversations[0] ?? null,
+			messages: conversations,
 		}
 	})

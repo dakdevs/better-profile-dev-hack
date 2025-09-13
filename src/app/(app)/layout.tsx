@@ -7,6 +7,7 @@ import type { Metadata, Viewport } from 'next'
 import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from '@mantine/core'
 import { Provider } from 'jotai'
 
+import { isDevelopment } from '~/config/env'
 import { geistMono, instrumentSans, rakkas } from '~/fonts'
 import theme from '~/styles/theme'
 import { cn } from '~/utils/cn'

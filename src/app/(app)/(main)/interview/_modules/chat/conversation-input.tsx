@@ -9,7 +9,7 @@ const formSchema = z.object({
 	message: z.string().min(1, 'Message cannot be empty'),
 })
 
-export default function ChatInput({
+export default function ConversationInput({
 	isLoading = false,
 	onSubmit,
 }: {

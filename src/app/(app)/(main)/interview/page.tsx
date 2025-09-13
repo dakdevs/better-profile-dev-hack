@@ -1,4 +1,4 @@
-import ChatContainer from './_modules/chat/chat-container'
+import ChatContainer from './_modules/chat/conversation-container'
 
 export default async function InterviewPage() {
 	return (

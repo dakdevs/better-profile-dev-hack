@@ -1,7 +1,7 @@
-import getMessage from './get-message'
+import getMessages from './get-messages'
 import sendMessage from './send-message'
 
 export default {
-	getMessage,
+	getMessages,
 	sendMessage,
 }

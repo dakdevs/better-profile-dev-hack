@@ -2,19 +2,24 @@
 
 import { useChat } from '@ai-sdk/react'
 import { eventIteratorToStream } from '@orpc/client'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { orpcClient } from '~/orpc/client'
 
-import ChatContent from './chat-content'
-import ChatInput from './chat-input'
+import ConversationInput from './conversation-input'
+import ConversationThread from './conversation-thread'
 
-export default function ChatContainer() {
+export default function ConversationContainer() {
+	const { data, isLoading: getMessagesIsLoading } = useQuery(
+		orpcClient.interview.getMessages.queryOptions(),
+	)
+
 	const { mutateAsync: sendChatMessage, isPending } = useMutation(
 		orpcClient.interview.sendMessage.mutationOptions(),
 	)
 
 	const { messages, sendMessage, status } = useChat({
+		messages
 		resume: true,
 		transport: {
 			async sendMessages(options) {
@@ -31,14 +36,14 @@ export default function ChatContainer() {
 		},
 	})
 
-	const isLoading = (status !== 'ready' && status !== 'error') || isPending
+	const isLoading = (status !== 'ready' && status !== 'error') || isPending || getMessagesIsLoading
 
 	return (
-		<div className="flex flex-1 flex-col">
-			<div className="flex-1 overflow-y-auto">
-				<ChatContent messages={messages} />
+		<div className="flex max-h-full flex-1 flex-col">
+			<div className="max-h-full flex-1 overflow-y-auto">
+				<ConversationThread messages={messages} />
 			</div>
-			<ChatInput
+			<ConversationInput
 				isLoading={isLoading}
 				onSubmit={(message) => {
 					void sendMessage({
