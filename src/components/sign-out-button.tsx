@@ -16,7 +16,7 @@ export default function SignOutButton() {
 				void signOut()
 			}}
 		>
-			Sign Out
+			{'Sign Out'}
 		</Button>
 	)
 }

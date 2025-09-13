@@ -2,7 +2,7 @@ import SignOutButton from '~/components/sign-out-button'
 
 export default function SettingsPage() {
 	return (
-		<div>
+		<div className="px-lg">
 			<SignOutButton />
 		</div>
 	)

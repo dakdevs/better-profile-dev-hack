@@ -1,9 +1,30 @@
-import ChatContainer from './_modules/chat/conversation-container'
+import { db } from '~/db'
+import { getRequiredSession } from '~/lib/auth'
+
+import Conversation from './_modules/chat/v2/chat/conversation'
 
 export default async function InterviewPage() {
+	const session = await getRequiredSession()
+	const initialMessages = await getInitialMessages(session.user.id)
+
 	return (
-		<div className="flex w-full flex-1 flex-col">
-			<ChatContainer />
+		<div className="flex h-full flex-col overflow-hidden">
+			<Conversation
+				userId={session.user.id}
+				initialMessages={initialMessages}
+			/>
 		</div>
 	)
+}
+
+async function getInitialMessages(userId: string) {
+	const messages = await db.query.interviewMessages.findMany({
+		where: (interviewMessages, { eq }) => eq(interviewMessages.userId, userId),
+		orderBy: (interviewMessages, { asc }) => asc(interviewMessages.createdAt),
+		columns: {
+			content: true,
+		},
+	})
+
+	return messages.map(({ content }) => content)
 }

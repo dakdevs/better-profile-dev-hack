@@ -86,6 +86,8 @@ export default protectedBase
 						messages: [data],
 					})
 				} catch (error) {
+					console.error('error', error)
+
 					return false
 				}
 
@@ -133,7 +135,8 @@ export default protectedBase
 
 		return streamToEventIterator(
 			stream.toUIMessageStream({
-				onFinish: async ({ responseMessage }) => {
+				originalMessages: previousMessages,
+				onFinish: ({ responseMessage }) => {
 					const now = new Date()
 
 					after(async () => {

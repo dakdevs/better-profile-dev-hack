@@ -19,7 +19,7 @@ export default function PageContainer({
 	bannerImageClassName?: string
 }) {
 	return (
-		<div className={cn('flex flex-1 flex-col', bannerImage && 'space-y-lg')}>
+		<div className={cn('flex h-full flex-col md:h-dvh', bannerImage && 'space-y-lg')}>
 			<div className="gap-md p-md flex items-center border-b border-neutral-200">
 				<SidebarToggle displayOn="collapsed" />
 				<div>
@@ -34,12 +34,12 @@ export default function PageContainer({
 							src={bannerImage}
 							alt="banner"
 							fill
-							className={cn('object- rounded-lg object-cover', bannerImageClassName)}
+							className={cn('rounded-lg object-cover', bannerImageClassName)}
 						/>
 					</div>
 				</div>
 			) : null}
-			<div className="p-lg gap-md flex flex-1 flex-col overflow-y-auto">{children}</div>
+			<div className="flex-1 overflow-y-auto">{children}</div>
 		</div>
 	)
 }

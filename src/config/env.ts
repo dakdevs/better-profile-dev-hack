@@ -22,7 +22,7 @@ export const env = createEnv({
 		CALCOM_CLIENT_ID: z.string(),
 		CALCOM_CLIENT_SECRET: z.string(),
 		CALCOM_ORGANIZATION_ID: z.string(),
-		AI_GATEWAY_API_KEY: z.string(),
+		AI_GATEWAY_API_KEY: isDevelopment ? z.string() : z.string().optional(),
 	},
 	runtimeEnv: {
 		NEXT_PUBLIC_APP_HOST: process.env.NEXT_PUBLIC_APP_HOST,

@@ -21,15 +21,18 @@ export default protectedBase
 		const { id: userId } = context.auth.user
 
 		const conversations = await db.query.interviewMessages.findMany({
-			where: (conversations, { or, and, gt, eq }) => {
+			where: (interviewMessages, { or, and, gt, eq }) => {
 				if (cursor) {
 					return and(
-						or(gt(conversations.createdAt, cursor.createdAt), gt(conversations.id, cursor.id)),
-						eq(conversations.userId, userId),
+						or(
+							gt(interviewMessages.createdAt, cursor.createdAt),
+							gt(interviewMessages.id, cursor.id),
+						),
+						eq(interviewMessages.userId, userId),
 					)
 				}
 
-				return eq(conversations.userId, userId)
+				return eq(interviewMessages.userId, userId)
 			},
 			columns: {
 				id: true,
@@ -37,8 +40,7 @@ export default protectedBase
 				role: true,
 				content: true,
 			},
-			orderBy: (messages, { desc }) => desc(messages.createdAt),
-			limit: 2,
+			orderBy: (interviewMessages, { asc }) => asc(interviewMessages.createdAt),
 		})
 
 		return {

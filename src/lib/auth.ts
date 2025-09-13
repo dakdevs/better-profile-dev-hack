@@ -49,11 +49,21 @@ export const auth = betterAuth({
 	},
 })
 
-export const getSession = cache(async function () {
+export const getSession = cache(async function getSession() {
 	return auth.api.getSession({
 		headers: await headers(),
 	})
 })
+
+export async function getRequiredSession() {
+	const session = await getSession()
+
+	if (!session) {
+		throw new Error('No session found')
+	}
+
+	return session
+}
 
 export const listAccounts = cache(async function () {
 	return await auth.api.listUserAccounts({

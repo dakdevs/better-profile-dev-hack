@@ -53,7 +53,11 @@ export default memo(function ConversationMessage({ message }: { message: UIMessa
 			)}
 		>
 			<div className="order-1">
-				{isUser ? <ConversationAvatar /> : <Avatar className="font-rakkas font-bold">BP</Avatar>}
+				{isUser ? (
+					<ConversationAvatar />
+				) : (
+					<Avatar className="font-rakkas font-bold">{'BP'}</Avatar>
+				)}
 			</div>
 			<div
 				className={cn(
@@ -70,7 +74,7 @@ export default memo(function ConversationMessage({ message }: { message: UIMessa
 
 						return (
 							<Streamdown
-								key={`part-${index}`}
+								key={`part-${String(index)}`}
 								components={{
 									p: ({ children }) => <p>{children}</p>,
 								}}
@@ -83,7 +87,7 @@ export default memo(function ConversationMessage({ message }: { message: UIMessa
 						&& message.parts.every((part) => part.type !== 'text')
 					) {
 						return (
-							<TextShimmer key={`part-${index}`}>
+							<TextShimmer key={`part-${String(index)}`}>
 								{`${INTERVIEWER_STATUS_LABELS[randomInteger(0, INTERVIEWER_STATUS_LABELS.length - 1)]}...`}
 							</TextShimmer>
 						)

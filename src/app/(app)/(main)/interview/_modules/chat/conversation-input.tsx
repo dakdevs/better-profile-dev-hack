@@ -38,7 +38,7 @@ export default function ConversationInput({
 			}}
 			className="mx-auto w-full max-w-5xl"
 		>
-			<div className="focus-within:ring-better-indigo flex h-24 w-full items-end rounded-xl ring ring-neutral-300 focus-within:ring-2">
+			<div className="relative flex w-full flex-col rounded-3xl border border-neutral-200 bg-neutral-50 px-1 pt-2 shadow-sm">
 				<form.Field name="message">
 					{(field) => {
 						return (
@@ -49,8 +49,9 @@ export default function ConversationInput({
 								onChange={(e) => {
 									field.handleChange(e.target.value)
 								}}
-								placeholder="Type your reply..."
-								className="p-md h-full flex-1 resize-none outline-none"
+								placeholder="Type your message..."
+								className="mb-1 max-h-32 min-h-[64px] w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-base outline-none placeholder:text-neutral-500"
+								rows={1}
 								onKeyDown={(e) => {
 									if (e.key === 'Enter' && !e.shiftKey) {
 										e.preventDefault()
@@ -72,16 +73,15 @@ export default function ConversationInput({
 				>
 					{([isSubmitting, isPristine, isTouched, canSubmit, isEmpty]) => {
 						return (
-							<div className="p-xs h-full">
+							<div className="relative mx-1 mt-2 mb-2 flex items-center justify-end">
 								<button
-									aria-disabled={
+									disabled={
 										isLoading || isSubmitting || isPristine || !isTouched || !canSubmit || isEmpty
 									}
 									type="submit"
-									className="gap-sm p-md bg-better-indigo aria-disabled:bg-better-indigo-400 flex h-full items-end rounded-xl text-white"
+									className="bg-better-indigo hover:bg-better-indigo-600 inline-flex size-[34px] items-center justify-center rounded-full p-1 text-white shadow-sm transition-all disabled:bg-neutral-300 disabled:text-neutral-500"
 								>
-									<span>Reply</span>
-									<Reply />
+									<Reply className="size-5" />
 								</button>
 							</div>
 						)

@@ -5,7 +5,7 @@ export const errorLoggingMiddleware = os.middleware(async ({ next, procedure }) 
 		return await next()
 	} catch (error) {
 		console.error('[oRPC Error]', {
-			procedure: procedure?.['~orpc']?.route,
+			procedure: procedure['~orpc'].route,
 			error,
 		})
 

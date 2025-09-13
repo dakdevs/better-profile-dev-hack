@@ -1,4 +1,3 @@
-import { DOMAttributes } from 'react'
 import { createFormHook, createFormHookContexts } from '@tanstack/react-form'
 
 export const { fieldContext, formContext, useFieldContext } = createFormHookContexts()

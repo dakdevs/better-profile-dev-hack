@@ -83,6 +83,8 @@ export default tseslint.config(
 		rules: {
 			'prettier/prettier': 'error',
 
+			'newline-before-return': 'error',
+
 			// ----------------------------------------------------------------------
 			// Existing project-specific rule tweaks
 			// ----------------------------------------------------------------------
