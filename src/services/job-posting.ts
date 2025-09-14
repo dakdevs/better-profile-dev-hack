@@ -103,7 +103,7 @@ export class JobPostingService {
 				requiredSkills: job.requiredSkills as Skill[],
 				preferredSkills: job.preferredSkills as Skill[],
 				experienceLevel: job.experienceLevel as ExperienceLevel,
-				keyTerms: [], // Empty for now since we don't store them
+				keyTerms: [], //this to
 				salaryRange: {
 					min: job.salaryMin || 0,
 					max: job.salaryMax || 0,

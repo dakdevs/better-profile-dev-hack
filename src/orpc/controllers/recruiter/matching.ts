@@ -49,11 +49,10 @@ export const matching = {
 
 			const jobPosting = jobPostingResponse.data.job
 
-			// Step 2: Prepare filters and pagination options for the matching service
-			// Step 3: Call the candidate matching service with the full job posting object and candidates
+
 			const matches = candidateMatchingService.findMatchingCandidates([], jobPosting)
 
-			// Step 4: Return the paginated list of matched candidates
+
 			return matches
 		}),
 }
