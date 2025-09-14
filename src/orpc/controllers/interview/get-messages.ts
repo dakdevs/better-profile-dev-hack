@@ -1,4 +1,4 @@
-import z from 'zod'
+import { z } from 'zod'
 
 import { db } from '~/db'
 import { protectedBase } from '~/orpc/middleware/bases'
@@ -10,7 +10,7 @@ export default protectedBase
 				cursor: z
 					.object({
 						createdAt: z.date(),
-						id: z.string().uuid(),
+						id: z.uuid(),
 					})
 					.optional(),
 			})

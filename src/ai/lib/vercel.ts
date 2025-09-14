@@ -1,7 +1,18 @@
 import { createGateway } from '@ai-sdk/gateway'
 
-import { env } from '~/config/env'
+import { serverConfig } from '~/config/server-config'
 
 export const vercel = createGateway({
-	apiKey: env.AI_GATEWAY_API_KEY,
+	apiKey: serverConfig.vercel.apiKey,
 })
+
+export const createVercelGatewayWithSupermemory = (superMemoryUserId: string) => {
+	return createGateway({
+		apiKey: serverConfig.vercel.apiKey,
+		baseURL: 'https://api.supermemory.ai/v3/https://ai-gateway.vercel.sh/v1',
+		headers: {
+			'x-supermemory-api-key': serverConfig.supermemory.key,
+			'x-sm-user-id': superMemoryUserId,
+		},
+	})
+}

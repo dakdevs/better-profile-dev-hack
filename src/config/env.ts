@@ -5,9 +5,7 @@ export const isDevelopment = process.env.NODE_ENV !== 'production'
 
 export const env = createEnv({
 	client: {
-		NEXT_PUBLIC_APP_HOST: isDevelopment
-			? z.string().url().default('http://localhost:3000')
-			: z.string().url(),
+		NEXT_PUBLIC_APP_HOST: isDevelopment ? z.url().default('http://localhost:3000') : z.url(),
 	},
 	server: {
 		NODE_ENV: z.string().default('development'),
@@ -23,6 +21,7 @@ export const env = createEnv({
 		CALCOM_CLIENT_SECRET: z.string(),
 		CALCOM_ORGANIZATION_ID: z.string(),
 		AI_GATEWAY_API_KEY: isDevelopment ? z.string() : z.string().optional(),
+		SUPERMEMORY_KEY: z.string(),
 	},
 	runtimeEnv: {
 		NEXT_PUBLIC_APP_HOST: process.env.NEXT_PUBLIC_APP_HOST,
@@ -37,6 +36,7 @@ export const env = createEnv({
 		CALCOM_CLIENT_SECRET: process.env.CALCOM_CLIENT_SECRET,
 		CALCOM_ORGANIZATION_ID: process.env.CALCOM_ORGANIZATION_ID,
 		AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
+		SUPERMEMORY_KEY: process.env.SUPERMEMORY_KEY,
 	},
 	emptyStringAsUndefined: true,
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,

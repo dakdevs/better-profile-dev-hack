@@ -21,4 +21,13 @@ export const serverConfig = {
 		clientSecret: env.CALCOM_CLIENT_SECRET,
 		organizationId: env.CALCOM_ORGANIZATION_ID,
 	},
+	supermemory: {
+		key: env.SUPERMEMORY_KEY,
+	},
+	vercel: {
+		apiKey: env.AI_GATEWAY_API_KEY,
+	},
+	openai: {
+		apiKey: env.OPENAI_API_KEY,
+	},
 }

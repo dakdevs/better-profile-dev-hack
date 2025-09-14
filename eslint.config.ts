@@ -4,6 +4,7 @@ import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import eslintPluginPrettier from 'eslint-plugin-prettier'
+import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 
 import { noAnyExceptInGenerics } from './eslint/no-any-except-in-generics'
@@ -24,7 +25,7 @@ const compat = new FlatCompat({
 // Export the flat config array using the `typescript-eslint` helper. This automatically
 // wires up the correct parser/plugin and exposes the `strictTypeChecked` preset.
 // -----------------------------------------------------------------------------------------
-export default tseslint.config(
+export default defineConfig(
 	// Global ignores
 	{
 		ignores: [
@@ -45,7 +46,7 @@ export default tseslint.config(
 	// Next.js + Prettier (converted via `FlatCompat`). The spread keeps the correct order.
 	...compat.extends('next', 'next/core-web-vitals', 'prettier'),
 
-	// TypeScript rules – start with the recommended set and then enable the strict
+	// TypeScript rules - start with the recommended set and then enable the strict
 	// type-checked variant which performs full program-level analysis.
 	...tseslint.configs.recommended,
 	...tseslint.configs.strictTypeChecked,
@@ -78,7 +79,6 @@ export default tseslint.config(
 	{
 		plugins: {
 			prettier: eslintPluginPrettier,
-			'local-rules': { rules: { 'no-any-except-in-generics': noAnyExceptInGenerics } },
 		},
 		rules: {
 			'prettier/prettier': 'error',
@@ -113,7 +113,7 @@ export default tseslint.config(
 				},
 			],
 
-			// Align with previous configuration – soften a few rules that are too strict
+			// Align with previous configuration - soften a few rules that are too strict
 			'no-use-before-define': 'off',
 			'@typescript-eslint/no-var-requires': 'off',
 			'@typescript-eslint/explicit-function-return-type': 'off',
@@ -143,7 +143,7 @@ export default tseslint.config(
 		},
 	},
 
-	tseslint.config({
+	defineConfig({
 		files: ['src/**/*.lib.ts', 'src/**/*.lib.tsx'],
 		rules: {
 			'@typescript-eslint/no-explicit-any': 'off',
@@ -153,7 +153,7 @@ export default tseslint.config(
 	eslintConfigPrettier,
 
 	// Custom configs
-	tseslint.config({
+	defineConfig({
 		files: ['src/**/*.ts', 'src/**/*.tsx'],
 		ignores: ['src/**/*.dts.ts', 'src/**/*.dts.tsx'],
 		rules: {
@@ -192,7 +192,7 @@ export default tseslint.config(
 			],
 		},
 	}),
-	tseslint.config({
+	defineConfig({
 		files: ['src/**/*.ts', 'src/**/*.tsx'],
 		ignores: [
 			'src/lib/**/*.ts',
@@ -204,8 +204,15 @@ export default tseslint.config(
 			'src/**/*.lib.ts',
 			'src/**/*.lib.tsx',
 		],
+		plugins: {
+			'better-profile': {
+				rules: {
+					'no-any-except-in-generics': noAnyExceptInGenerics,
+				},
+			},
+		},
 		rules: {
-			'local-rules/no-any-except-in-generics': 'error',
+			'better-profile/no-any-except-in-generics': 'error',
 			'no-restricted-syntax': [
 				'error',
 				{
