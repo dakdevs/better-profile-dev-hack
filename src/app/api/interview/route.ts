@@ -93,7 +93,6 @@ export async function POST(request: Request) {
 		}),
 	)
 
-	console.log('newUserMessage', newUserMessage)
 	await saveMessage(session.user.id, newUserMessage)
 
 	const result = streamText({
