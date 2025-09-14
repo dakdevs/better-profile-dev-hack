@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "name": "Code Quality Guardian",
+  "description": "Monitors source code files for changes and analyzes them for potential improvements. Provides suggestions to enhance code quality, focusing on readability, maintainability, and performance, without altering existing functionality.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/components/**/*.tsx",
+      "src/app/**/*.tsx",
+      "src/orpc/controllers/**/*.ts",
+      "src/db/models/**/*.ts",
+      "src/lib/**/*.ts",
+      "src/utils/**/*.ts",
+      "src/atoms/**/*.ts",
+      "src/services/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A file has been modified. Please analyze the changes for potential improvements, keeping the following in mind:\n\n1. **Code Smells:** Identify any code smells (e.g., long methods, large classes, duplicate code, etc.).\n2. **Design Patterns:** Suggest the use of relevant design patterns where applicable to improve structure and scalability.\n3. **Best Practices:** Ensure the code follows language-specific and general programming best practices.\n4. **Readability & Maintainability:** Provide suggestions to make the code easier to read, understand, and maintain.\n5. **Performance:** Point out any potential performance bottlenecks and suggest optimizations.\n\nYour goal is to generate suggestions for improving code quality while ensuring the existing functionality remains unchanged. Provide clear, actionable feedback with code examples where possible."
+  }
+}

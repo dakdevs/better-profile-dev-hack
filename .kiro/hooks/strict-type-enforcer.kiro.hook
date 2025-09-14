@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "name": "Strict Type Enforcer",
+  "description": "Monitors TypeScript files for the use of 'any' or other abstract/non-existent types. Infers the correct, specific type from the context and suggests a replacement to enforce strict typing and pass linting.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/components/**/*.tsx",
+      "src/app/**/*.tsx",
+      "src/orpc/controllers/**/*.ts",
+      "src/db/models/**/*.ts",
+      "src/lib/**/*.ts",
+      "src/utils/**/*.ts",
+      "src/atoms/**/*.ts",
+      "src/services/**/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A TypeScript file has been modified. Please review it to enforce strict typing by fixing vague or non-existent types.\n\n1. **Find 'any' Types:** Locate all variables, parameters, and return types explicitly set to `any`.\n2. **Identify Abstract/Unknown Types:** Find any types that are not defined, imported, or are misspelled.\n3. **Infer the Correct Type:** Based on the variable's name, its value assignment, and how it's used in the code, determine the most accurate and specific type.\n4. **Suggest Corrections:** Provide specific code changes to replace `any` or the incorrect type with the inferred, correct type.\n\nFor example:\n- If you see `const userUrl: any = '...';`, suggest changing it to `const userUrl: string = '...';`.\n- If a function receives `(data: any)` and uses `data.id` and `data.name`, suggest an inline type like `{ id: number; name:string; }` or a known interface if one exists.\n\nThe goal is to make the code type-safe and ensure it passes strict linting rules."
+  }
+}

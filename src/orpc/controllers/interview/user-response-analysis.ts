@@ -124,3 +124,37 @@ async function gradeResponse(userResponse: string, analysis: any): Promise<numbe
 
 	return Math.max(0, Math.min(2.0, score));
 }
+
+
+async function createSkillMention(params: {
+	userSkillId: string;
+	userId: string;
+	sessionId?: string | null;
+	messageIndex?: number | null;
+	mentionText?: string | null;
+	confidence?: number | null;
+	engagementLevel?: string | null;
+	topicDepth?: number | null;
+	conversationContext?: string | null;
+}) {
+	try {
+		console.log('💾 Inserting skill mention for user skill:', params.userSkillId);
+		const inserted = await db.insert(skillMentions).values({
+			userSkillId: params.userSkillId,
+			userId: params.userId,
+			sessionId: params.sessionId ?? null,
+			messageIndex: params.messageIndex ?? null,
+			mentionText: params.mentionText ?? null,
+			confidence: params.confidence != null ? String(params.confidence) : null,
+			engagementLevel: params.engagementLevel ?? null,
+			topicDepth: params.topicDepth != null ? String(params.topicDepth) : null,
+			conversationContext: params.conversationContext ?? null,
+		}).returning();
+
+		console.log('✅ Skill mention inserted with id:', inserted[0].id);
+		return inserted[0];
+	} catch (error) {
+		console.error('❌ Failed to insert skill mention:', error);
+		throw error;
+	}
+}
