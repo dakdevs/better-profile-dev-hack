@@ -56,6 +56,9 @@ importers:
       '@orpc/tanstack-query':
         specifier: 1.8.5
         version: 1.8.5(@opentelemetry/api@1.9.0)(@orpc/client@1.8.5(@opentelemetry/api@1.9.0))(@tanstack/query-core@5.85.6)
+      '@prompt-template/core':
+        specifier: 0.11.1
+        version: 0.11.1
       '@radix-ui/react-avatar':
         specifier: 1.1.10
         version: 1.1.10(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1703,6 +1706,9 @@ packages:
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
+
+  '@prompt-template/core@0.11.1':
+    resolution: {integrity: sha512-LcHtU24hlSA0a0N4sf6pY8U9fBKxmtMlkLA1E0Pls3Cpw9NU3n4WUqS48AihX23vmBvLlaRw+lspmbXl1gHA4g==}
 
   '@protobufjs/aspromise@1.1.2':
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -7896,6 +7902,11 @@ snapshots:
   '@pkgr/core@0.2.9': {}
 
   '@polka/url@1.0.0-next.29': {}
+
+  '@prompt-template/core@0.11.1':
+    dependencies:
+      strip-indent: 3.0.0
+      type-fest: 4.41.0
 
   '@protobufjs/aspromise@1.1.2': {}
 
