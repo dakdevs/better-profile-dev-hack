@@ -108,3 +108,19 @@ function extractTopicsFromText(text: string): string[] {
 
 	return topics;
 }
+
+async function gradeResponse(userResponse: string, analysis: any): Promise<number> {
+	// Simple scoring based on engagement and depth
+	let score = 1.0; // Base score
+
+	if (analysis.engagementLevel === 'high') score += 0.5;
+	else if (analysis.engagementLevel === 'low') score -= 0.3;
+
+	if (analysis.responseLength === 'detailed') score += 0.3;
+	else if (analysis.responseLength === 'brief') score -= 0.2;
+
+	if (analysis.confidenceLevel === 'confident') score += 0.2;
+	else if (analysis.confidenceLevel === 'struggling') score -= 0.3;
+
+	return Math.max(0, Math.min(2.0, score));
+}
