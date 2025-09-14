@@ -79,7 +79,7 @@ export async function getAccountByProvider(provider: 'linkedin') {
 	const accounts = await listAccounts()
 
 	const account = accounts.find((account) => {
-		return account.provider === provider
+		return account.providerId === provider
 	})
 
 	if (!account) {
