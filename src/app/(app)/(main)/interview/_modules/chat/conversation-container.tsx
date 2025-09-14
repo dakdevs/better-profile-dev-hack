@@ -23,11 +23,11 @@ export default function ConversationContainer() {
 
 	const { messages, sendMessage, status } = useChat({
 		transport: {
-			async sendMessages(options) {
+			async sendMessages({ chatId, messages }) {
 				return eventIteratorToStream(
 					await sendChatMessage({
-						chatId: options.chatId,
-						message: options.messages[0],
+						chatId: chatId,
+						message: messages[0],
 					}),
 				)
 			},

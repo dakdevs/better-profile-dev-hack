@@ -13,6 +13,8 @@ export default function Conversation({
 	userId: string
 	initialMessages: UIMessage[]
 }) {
+	console.log('initialMessages', initialMessages)
+
 	const runtime = useChatRuntime({
 		messages: initialMessages,
 		transport: new AssistantChatTransport({

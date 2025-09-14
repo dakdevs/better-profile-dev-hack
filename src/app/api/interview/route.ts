@@ -1,5 +1,6 @@
 import { after } from 'next/server'
-import { convertToModelMessages, streamText, UIMessage } from 'ai'
+import { convertToModelMessages, streamText, UIMessage, validateUIMessages } from 'ai'
+import z from 'zod'
 
 import { vercel } from '~/ai/lib/vercel'
 import { db } from '~/db'
@@ -73,7 +74,26 @@ export async function POST(request: Request) {
 
 	const messages = await getMessages(session.user.id)
 
-	const { message: newUserMessage } = (await request.json()) as { message: UIMessage }
+	const { message: newUserMessage } = await parseRequest(
+		request,
+		z.object({
+			message: z.custom<UIMessage>().refine(async (data) => {
+				try {
+					await validateUIMessages({
+						messages: [data],
+					})
+				} catch (error) {
+					console.error('error', error)
+
+					return false
+				}
+
+				return true
+			}),
+		}),
+	)
+
+	console.log('newUserMessage', newUserMessage)
 	await saveMessage(session.user.id, newUserMessage)
 
 	const result = streamText({
@@ -83,12 +103,20 @@ export async function POST(request: Request) {
 	})
 
 	return result.toUIMessageStreamResponse({
-		onFinish: ({ responseMessage }) => {
+		onFinish: ({ responseMessage, messages }) => {
+			console.log('responseMessage.id', responseMessage.id)
+			console.log('messages', messages)
 			after(async function saveResponseMessageOnFinish() {
 				await saveMessage(session.user.id, responseMessage)
 			})
 		},
 	})
+}
+
+async function parseRequest(request: Request, schema: z.AnyZodObject) {
+	const jsonBody = await request.json()
+
+	return schema.parseAsync(jsonBody)
 }
 
 async function getMessages(userId: string) {
@@ -108,6 +136,9 @@ async function saveMessage(userId: string, message: UIMessage) {
 	return db.insert(interviewMessages).values({
 		userId,
 		role: message.role,
-		content: message,
+		content: {
+			...message,
+			id: message.id || crypto.randomUUID(),
+		},
 	})
 }
