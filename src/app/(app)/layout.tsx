@@ -8,6 +8,7 @@ import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from '@mantine/c
 import { Provider } from 'jotai'
 
 import { geistMono, instrumentSans, rakkas } from '~/fonts'
+import theme from '~/styles/theme'
 import { cn } from '~/utils/cn'
 
 import TanstackQueryClientProvider from './_modules/tanstack-query-client'
@@ -72,11 +73,7 @@ export default function RootLayout({
 				<body className="h-full font-sans">
 					<div className="root isolate h-full">
 						<Provider>
-							<MantineProvider
-								theme={{ fontFamily: 'var(--font-sans), Helvetica, Arial, sans-serif' }}
-							>
-								{children}
-							</MantineProvider>
+							<MantineProvider theme={theme}>{children}</MantineProvider>
 						</Provider>
 					</div>
 				</body>

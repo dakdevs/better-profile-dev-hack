@@ -3,6 +3,7 @@ import interview from './interview'
 import ping from './ping'
 import recruiter from './recruiter'
 
+<<<<<<< HEAD
 const controllers = {
 	ping,
 	interview,
@@ -10,3 +11,11 @@ const controllers = {
 } as const
 
 export default controllers
+=======
+const coreRouter = {
+	ping,
+	interview,
+}
+
+export default coreRouter
+>>>>>>> production

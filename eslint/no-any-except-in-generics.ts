@@ -52,6 +52,7 @@ export const noAnyExceptInGenerics = createRule<Options, MessageIds>({
 
 				cur = (cur as TSESTree.Node).parent
 			}
+
 			return false
 		}
 

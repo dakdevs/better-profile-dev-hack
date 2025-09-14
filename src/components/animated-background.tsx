@@ -169,7 +169,11 @@ export default function AnimatedBackground() {
 
 					if (distance < 80) {
 						const opacity = ((80 - distance) / 80) * 0.2 // Increased connection opacity
+<<<<<<< HEAD
 						ctx.strokeStyle = `rgba(71, 85, 105, ${opacity.toString()})`
+=======
+						ctx.strokeStyle = `rgba(71, 85, 105, ${String(opacity)})`
+>>>>>>> production
 						ctx.beginPath()
 						ctx.moveTo(p1.x, p1.y)
 						ctx.lineTo(p2.x, p2.y)

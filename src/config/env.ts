@@ -21,6 +21,10 @@ export const env = createEnv({
 		DATABASE_URL: isDevelopment
 			? z.string().default('postgresql://betterprofile:betterprofile@localhost:5432/betterprofile')
 			: z.string(),
+		CALCOM_CLIENT_ID: z.string(),
+		CALCOM_CLIENT_SECRET: z.string(),
+		CALCOM_ORGANIZATION_ID: z.string(),
+		AI_GATEWAY_API_KEY: isDevelopment ? z.string() : z.string().optional(),
 	},
 	runtimeEnv: {
 		NEXT_PUBLIC_APP_HOST: process.env.NEXT_PUBLIC_APP_HOST,
@@ -31,8 +35,15 @@ export const env = createEnv({
 		GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
 		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 		OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+<<<<<<< HEAD
 		HUGGINGFACE_API_TOKEN: process.env.HUGGINGFACE_API_TOKEN,
 		CAL_API_KEY: process.env.CAL_API_KEY,
+=======
+		CALCOM_CLIENT_ID: process.env.CALCOM_CLIENT_ID,
+		CALCOM_CLIENT_SECRET: process.env.CALCOM_CLIENT_SECRET,
+		CALCOM_ORGANIZATION_ID: process.env.CALCOM_ORGANIZATION_ID,
+		AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
+>>>>>>> production
 	},
 	emptyStringAsUndefined: true,
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,

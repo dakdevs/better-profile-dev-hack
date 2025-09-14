@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/lib/utils.ts
 
 /**
@@ -9,4 +10,11 @@ export function generateId(prefix: string = 'id'): string {
 	const timestamp = Date.now().toString(36)
 	const randomPart = Math.random().toString(36).substring(2, 9)
 	return `${prefix}_${timestamp}${randomPart}`
+=======
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs))
+>>>>>>> production
 }

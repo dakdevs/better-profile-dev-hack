@@ -1,11 +1,12 @@
+import { UIMessage } from 'ai'
 import { relations } from 'drizzle-orm'
-import { index, pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core'
+import { index, jsonb, pgEnum, pgTable, uuid } from 'drizzle-orm/pg-core'
 
 import { timestamps } from '../utils'
 import { users } from './users'
 
 // Enum for message roles
-export const messageRoleEnum = pgEnum('message_role', ['user', 'assistant'])
+export const messageRoleEnum = pgEnum('message_role', ['user', 'assistant', 'system'])
 
 export const interviewMessages = pgTable(
 	'interview_messages',
@@ -15,7 +16,7 @@ export const interviewMessages = pgTable(
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),
 		role: messageRoleEnum().notNull(),
-		content: text().notNull(),
+		content: jsonb().$type<UIMessage>().notNull(),
 		...timestamps,
 	},
 	(table) => [index().on(table.userId, table.createdAt, table.id)],

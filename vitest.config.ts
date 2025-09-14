@@ -6,6 +6,7 @@ export default defineConfig({
 		environment: 'jsdom',
 		setupFiles: ['./src/test/setup.ts'],
 		globals: true,
+<<<<<<< HEAD
 		
 		// Coverage configuration
 		coverage: {
@@ -43,6 +44,8 @@ export default defineConfig({
 			GOOGLE_CLIENT_ID: 'test-client-id',
 			GOOGLE_CLIENT_SECRET: 'test-client-secret'
 		}
+=======
+>>>>>>> production
 	},
 	resolve: {
 		alias: {

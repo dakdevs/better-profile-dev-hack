@@ -2,7 +2,7 @@ import { cache } from 'react'
 import { headers } from 'next/headers'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { admin } from 'better-auth/plugins'
+import { admin, genericOAuth } from 'better-auth/plugins'
 
 import { publicConfig } from '~/config/public-config'
 import { serverConfig } from '~/config/server-config'
@@ -10,7 +10,20 @@ import { db } from '~/db'
 import * as schema from '~/db/models'
 
 export const auth = betterAuth({
-	plugins: [admin()],
+	plugins: [
+		admin(),
+		genericOAuth({
+			config: [
+				{
+					providerId: 'calcom',
+					clientId: serverConfig.calcom.clientId,
+					clientSecret: serverConfig.calcom.clientSecret,
+					authorizationUrl: 'https://app.cal.com/auth/oauth2/authorize',
+					tokenUrl: 'https://app.cal.com/api/auth/oauth/token',
+				},
+			],
+		}),
+	],
 	database: drizzleAdapter(db, {
 		provider: 'pg',
 		schema: {
@@ -36,11 +49,21 @@ export const auth = betterAuth({
 	},
 })
 
-export const getSession = cache(async function () {
+export const getSession = cache(async function getSession() {
 	return auth.api.getSession({
 		headers: await headers(),
 	})
 })
+
+export async function getRequiredSession() {
+	const session = await getSession()
+
+	if (!session) {
+		throw new Error('No session found')
+	}
+
+	return session
+}
 
 export const listAccounts = cache(async function () {
 	return await auth.api.listUserAccounts({

@@ -16,10 +16,17 @@ export const serverConfig = {
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
 		},
 	},
+<<<<<<< HEAD
 	ai: {
 		openRouterApiKey: env.OPENROUTER_API_KEY,
 	},
 	cal: {
 		apiKey: env.CAL_API_KEY,
+=======
+	calcom: {
+		clientId: env.CALCOM_CLIENT_ID,
+		clientSecret: env.CALCOM_CLIENT_SECRET,
+		organizationId: env.CALCOM_ORGANIZATION_ID,
+>>>>>>> production
 	},
 }
