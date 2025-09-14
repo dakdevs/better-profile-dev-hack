@@ -4,7 +4,7 @@ import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import eslintPluginPrettier from 'eslint-plugin-prettier'
-import { defineConfig } from 'eslint/config'
+import { defineConfig, globalIgnores } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 
 import { noAnyExceptInGenerics } from './eslint/no-any-except-in-generics'
@@ -26,19 +26,17 @@ const compat = new FlatCompat({
 // wires up the correct parser/plugin and exposes the `strictTypeChecked` preset.
 // -----------------------------------------------------------------------------------------
 export default defineConfig(
-	// Global ignores
-	{
-		ignores: [
-			'node_modules/**',
-			'.next/**',
-			'out/**',
-			'build/**',
-			'next-env.d.ts',
-			'**/dist',
-			'**/*.js',
-			'src/payload/generated/**/*',
-		],
-	},
+	globalIgnores([
+		'node_modules/**',
+		'.next/**',
+		'out/**',
+		'build/**',
+		'next-env.d.ts',
+		'**/dist',
+		'**/*.js',
+		'src/payload/generated/**/*',
+		'src/platform/**', // TODO: Remove this once we don't need it anymore
+	]),
 
 	// Base JavaScript rules.
 	js.configs.recommended,
