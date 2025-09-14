@@ -15,3 +15,4 @@ ALTER TABLE "skill_mentions" ADD COLUMN "engagement_level" text;
 ALTER TABLE "skill_mentions" ADD COLUMN "topic_depth" text;
 ALTER TABLE "skill_mentions" ADD COLUMN "conversation_context" text;
 
+

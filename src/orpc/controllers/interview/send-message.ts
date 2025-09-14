@@ -50,11 +50,12 @@ export default protectedBase
 
 		// --- RAG Agent Integration ---
 		// 1. Process the user's query with the RAG agent first
+		console.log('🤖 RAG Agent: Processing user query...')
 		const ragResponse = await ragAgent.processQuery(userMessageContent, userId)
 
 		// 2. If the RAG agent blocks the query, return its response directly
 		if (!ragResponse.isRelevant && ragResponse.response) {
-			console.log('RAG Agent blocked off-topic query.')
+			console.log('🚫 RAG Agent blocked off-topic query.')
 			// Return early response for off-topic queries
 			return streamToEventIterator(
 				(async function* () {
@@ -65,6 +66,9 @@ export default protectedBase
 
 		// 3. Use the enhanced prompt from the RAG agent for the main AI
 		const promptForMastra = ragResponse.enhancedPrompt || userMessageContent
+		console.log('✅ RAG Agent: Enhanced prompt ready for main LLM')
+		console.log('📝 Enhanced prompt length:', promptForMastra.length)
+		console.log('🎯 Context included:', ragResponse.enhancedPrompt ? 'Yes' : 'No')
 
 		// --- Original Mastra Agent Call ---
 		const agent = mastra.getAgent('careerInterviewerAgent')

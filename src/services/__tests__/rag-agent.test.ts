@@ -314,5 +314,145 @@ describe('InterviewRAGAgent', () => {
       expect(result.isRelevant).toBe(true)
       expect(result.enhancedPrompt).toBeDefined()
     })
+
+    it('should create enhanced prompt with context for personalized interview', async () => {
+      // Mock relevance check
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          choices: [{ message: { content: 'YES' } }]
+        })
+      })
+
+      const result = await agent.processQuery(
+        'Tell me more about your React experience',
+        'user123'
+      )
+
+      expect(result.isRelevant).toBe(true)
+      expect(result.enhancedPrompt).toContain('Tell me more about your React experience')
+      expect(result.enhancedPrompt).toContain('Previous conversation context')
+      expect(result.enhancedPrompt).toContain('personalized and contextually relevant')
+      expect(result.enhancedPrompt).toContain('engaging interview experience')
+    })
+
+    it('should handle multiple context pieces in enhanced prompt', async () => {
+      // Mock relevance check
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          choices: [{ message: { content: 'YES' } }]
+        })
+      })
+
+      const result = await agent.processQuery(
+        'What about your backend experience?',
+        'user123'
+      )
+
+      expect(result.isRelevant).toBe(true)
+      expect(result.enhancedPrompt).toContain('Previous conversation context')
+      expect(result.enhancedPrompt).toContain('Previous interview about React')
+      expect(result.enhancedPrompt).toContain('Discussion about JavaScript skills')
+      expect(result.enhancedPrompt).toContain('---') // Separator between context pieces
+    })
+
+    it('should provide fallback when no context is available', async () => {
+      // Mock relevance check
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          choices: [{ message: { content: 'YES' } }]
+        })
+      })
+
+      // Mock empty context retrieval
+      const { db } = await import('~/db')
+      vi.mocked(db.select).mockImplementationOnce(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            orderBy: vi.fn(() => ({
+              limit: vi.fn(() => Promise.resolve([])) // No context
+            }))
+          }))
+        }))
+      }) as any)
+
+      const result = await agent.processQuery(
+        'Tell me about yourself',
+        'user123'
+      )
+
+      expect(result.isRelevant).toBe(true)
+      expect(result.enhancedPrompt).toContain('Tell me about yourself')
+      expect(result.enhancedPrompt).not.toContain('Previous conversation context')
+      expect(result.enhancedPrompt).toContain('personalized and contextually relevant')
+    })
+  })
+
+  describe('RAG agent with main LLM integration', () => {
+    it('should provide enhanced prompt that main LLM can use effectively', async () => {
+      // Mock relevance check
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          choices: [{ message: { content: 'YES' } }]
+        })
+      })
+
+      const result = await agent.processQuery(
+        'I have 5 years of React experience',
+        'user123'
+      )
+
+      expect(result.isRelevant).toBe(true)
+      expect(result.enhancedPrompt).toBeDefined()
+      
+      // Verify the enhanced prompt has the right structure for the main LLM
+      expect(result.enhancedPrompt).toContain('Current user query:')
+      expect(result.enhancedPrompt).toContain('Note: Use the previous conversation context')
+      expect(result.enhancedPrompt).toContain('personalized and contextually relevant')
+      expect(result.enhancedPrompt).toContain('engaging interview experience')
+    })
+
+    it('should handle off-topic queries by providing direct response', async () => {
+      // Mock relevance check to return NO
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          choices: [{ message: { content: 'NO' } }]
+        })
+      })
+
+      const result = await agent.processQuery(
+        'What is the weather like today?',
+        'user123'
+      )
+
+      expect(result.isRelevant).toBe(false)
+      expect(result.response).toBeDefined()
+      expect(result.response).toContain("Let's stay focused on the interview")
+      expect(result.enhancedPrompt).toBeUndefined()
+    })
+
+    it('should maintain conversation flow with context-aware responses', async () => {
+      // Mock relevance check
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          choices: [{ message: { content: 'YES' } }]
+        })
+      })
+
+      const result = await agent.processQuery(
+        'Can you elaborate on that React project you mentioned?',
+        'user123'
+      )
+
+      expect(result.isRelevant).toBe(true)
+      expect(result.enhancedPrompt).toContain('elaborate on that React project')
+      expect(result.enhancedPrompt).toContain('Previous conversation context')
+      expect(result.enhancedPrompt).toContain('Previous interview about React')
+    })
   })
 })

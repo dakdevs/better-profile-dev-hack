@@ -161,7 +161,10 @@ export class InterviewRAGAgent {
 		const contextText =
 			context.length > 0 ? `Previous conversation context:\n${context.join('\n---\n')}\n\n` : ''
 
-		const enhancedPrompt = `${contextText}Current user query: ${userQuery}`
+		// Enhanced prompt with better structure for the main LLM
+		const enhancedPrompt = `${contextText}Current user query: ${userQuery}
+
+Note: Use the previous conversation context to provide more personalized and contextually relevant follow-up questions. If the user has mentioned specific technologies, experiences, or topics before, reference them naturally in your response to create a more engaging interview experience.`
 
 		console.log('📝 Enhanced prompt structure:')
 		console.log(`  📚 Context pieces: ${String(context.length)}`)
@@ -169,6 +172,7 @@ export class InterviewRAGAgent {
 
 		if (context.length > 0) {
 			console.log('  🧠 Using conversation history for context-aware response')
+			console.log('  🎯 Context will help personalize the interview experience')
 		} else {
 			console.log('  🆕 No previous context - treating as fresh conversation')
 		}
