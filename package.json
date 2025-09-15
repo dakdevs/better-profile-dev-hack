@@ -33,6 +33,7 @@
     "@assistant-ui/react-markdown": "0.11.0",
     "@base-ui-components/react": "1.0.0-beta.3",
     "@better-fetch/fetch": "1.1.18",
+    "@calcom/atoms": "1.5.0",
     "@mantine/core": "8.3.1",
     "@mantine/hooks": "8.3.1",
     "@mastra/core": "0.16.3",

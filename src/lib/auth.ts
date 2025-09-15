@@ -20,6 +20,8 @@ export const auth = betterAuth({
 					clientSecret: serverConfig.calcom.clientSecret,
 					authorizationUrl: 'https://app.cal.com/auth/oauth2/authorize',
 					tokenUrl: 'https://app.cal.com/api/auth/oauth/token',
+					scopes: ['READ_BOOKING', 'READ_PROFILE'],
+					disableSignUp: true,
 				},
 			],
 		}),
@@ -45,6 +47,13 @@ export const auth = betterAuth({
 	advanced: {
 		database: {
 			generateId: false,
+		},
+	},
+	account: {
+		accountLinking: {
+			enabled: true,
+			trustedProviders: ['calcom'],
+			allowDifferentEmails: true,
 		},
 	},
 })

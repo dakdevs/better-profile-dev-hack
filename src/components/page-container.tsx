@@ -19,7 +19,7 @@ export default function PageContainer({
 	bannerImageClassName?: string
 }) {
 	return (
-		<div className={cn('flex h-full flex-col md:h-dvh', bannerImage && 'space-y-lg')}>
+		<div className={cn('flex h-full flex-col md:h-dvh', bannerImage && 'space-y-md md:space-y-lg')}>
 			<div className="gap-md p-md flex items-center border-b border-neutral-200">
 				<SidebarToggle displayOn="collapsed" />
 				<div>
@@ -28,7 +28,7 @@ export default function PageContainer({
 				</div>
 			</div>
 			{bannerImage ? (
-				<div className="px-lg">
+				<div className="px-md md:px-lg">
 					<div className="relative h-48 w-full">
 						<Image
 							src={bannerImage}
