@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { eq, sql } from 'drizzle-orm'
 
 import { db } from '~/db'
 import { jobPostings, users } from '~/db/models'
 import { userSkills } from '~/db/models/user-skills'
 
-// Inlined minimal candidate matching logic (adapted from platform service)
+// Types
 type Skill = { name: string; proficiencyScore?: number; category?: string }
 type JobPosting = {
 	id: string
@@ -28,6 +27,22 @@ type CandidateWithMatch = {
 		skillGaps: Skill[]
 		overallFit: 'excellent' | 'good' | 'fair' | 'poor'
 		availability: string[]
+	}
+}
+
+type JobMatchingOptions = {
+	minMatchScore?: number
+	limit?: number
+}
+
+type JobMatchingErrorCode = 'JOB_NOT_FOUND' | 'NO_CANDIDATES'
+
+export class JobMatchingError extends Error {
+	code: JobMatchingErrorCode
+
+	constructor(code: JobMatchingErrorCode, message: string) {
+		super(message)
+		this.code = code
 	}
 }
 
@@ -148,10 +163,6 @@ async function getCandidatesWithSkillsPaginated(limit: number): Promise<Candidat
 	return Array.from(map.values())
 }
 
-function toArray<T>(val: T[] | undefined): T[] {
-	return Array.isArray(val) ? val : []
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null
 }
@@ -179,8 +190,8 @@ async function findMatchingCandidates(
 ): Promise<{ data: CandidateWithMatch[] }> {
 	const candidates = await getCandidatesWithSkillsPaginated(100)
 	const matches: CandidateWithMatch[] = candidates.map((c) => {
-		const required = toArray(jobPosting.requiredSkills)
-		const preferred = toArray(jobPosting.preferredSkills)
+		const required = Array.isArray(jobPosting.requiredSkills) ? jobPosting.requiredSkills : []
+		const preferred = Array.isArray(jobPosting.preferredSkills) ? jobPosting.preferredSkills : []
 		const result = calculateSkillMatch(c.skills, required, preferred)
 
 		return {
@@ -201,84 +212,52 @@ async function findMatchingCandidates(
 	return { data: filtered.slice(0, limit) }
 }
 
-// POST /api/jobs/matching - Get candidates matching a job posting
-// Input: { jobID: string }
-// Output: { candidateID: string }
-export async function POST(req: NextRequest) {
-	try {
-		const raw: unknown = await req.json()
-		const body = (typeof raw === 'object' && raw !== null ? raw : {}) as Record<string, unknown>
-		const jobID = typeof body.jobID === 'string' ? body.jobID : undefined
+export async function findTopCandidateIdForJob(
+	jobId: string,
+	options: JobMatchingOptions = {},
+): Promise<string> {
+	const { minMatchScore = 10, limit = 1 } = options
 
-		if (!jobID) {
-			return NextResponse.json(
-				{ error: 'jobID parameter is required and must be a string' },
-				{ status: 400 },
-			)
-		}
+	const job = await db
+		.select({
+			id: jobPostings.id,
+			requiredSkills: jobPostings.requiredSkills,
+			preferredSkills: jobPostings.preferredSkills,
+		})
+		.from(jobPostings)
+		.where(eq(jobPostings.id, jobId))
+		.limit(1)
 
-		const job = await db
+	if (job.length === 0) {
+		throw new JobMatchingError('JOB_NOT_FOUND', 'Job not found')
+	}
+
+	const jobData = job[0]
+	const jobPostingInput: JobPosting = {
+		id: jobData.id,
+		requiredSkills: toSkills(jobData.requiredSkills),
+		preferredSkills: toSkills(jobData.preferredSkills),
+	}
+
+	const matchesResult = await findMatchingCandidates(jobPostingInput, minMatchScore, limit)
+
+	if (matchesResult.data.length === 0) {
+		const candidateWithSkills = await db
 			.select({
-				id: jobPostings.id,
-				title: jobPostings.title,
-				requiredSkills: jobPostings.requiredSkills,
-				preferredSkills: jobPostings.preferredSkills,
-				rawDescription: jobPostings.rawDescription,
-				experienceLevel: jobPostings.experienceLevel,
-				salaryMin: jobPostings.salaryMin,
-				salaryMax: jobPostings.salaryMax,
-				createdAt: jobPostings.createdAt,
-				updatedAt: jobPostings.updatedAt,
+				userId: users.id,
 			})
-			.from(jobPostings)
-			.where(eq(jobPostings.id, jobID))
+			.from(users)
+			.innerJoin(userSkills, sql`${users.id}::text = ${userSkills.userId}`)
 			.limit(1)
 
-		if (job.length === 0) {
-			return NextResponse.json({ error: 'Job not found' }, { status: 404 })
+		if (candidateWithSkills.length === 0) {
+			throw new JobMatchingError('NO_CANDIDATES', 'No candidates found in database')
 		}
 
-		const jobData = job[0]
-		const jobPostingInput: JobPosting = {
-			id: jobData.id,
-			requiredSkills: toSkills(jobData.requiredSkills),
-			preferredSkills: toSkills(jobData.preferredSkills),
-		}
-
-		const matchesResult = await findMatchingCandidates(jobPostingInput, 10, 1)
-
-		if (matchesResult.data.length === 0) {
-			const candidateWithSkills = await db
-				.select({
-					userId: users.id,
-					userName: users.name,
-					userEmail: users.email,
-				})
-				.from(users)
-				.innerJoin(userSkills, sql`${users.id}::text = ${userSkills.userId}`)
-				.limit(1)
-
-			if (candidateWithSkills.length === 0) {
-				return NextResponse.json(
-					{
-						error: 'No candidates found in database',
-					},
-					{ status: 404 },
-				)
-			}
-
-			const candidateID = candidateWithSkills[0].userId
-
-			return NextResponse.json({ candidateID })
-		}
-
-		const topCandidate = matchesResult.data[0]
-		const candidateID = topCandidate.candidate.id
-
-		return NextResponse.json({ candidateID })
-	} catch (error) {
-		console.error('jobs/matching route error', error)
-
-		return NextResponse.json({ error: 'Failed to find matching candidates' }, { status: 500 })
+		return candidateWithSkills[0].userId
 	}
+
+	const topCandidate = matchesResult.data[0]
+
+	return topCandidate.candidate.id
 }
