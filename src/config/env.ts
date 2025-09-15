@@ -4,7 +4,9 @@ import { z } from 'zod'
 export const isDevelopment = process.env.NODE_ENV !== 'production'
 
 export const env = createEnv({
-    client: {
+
+    
+client: {
 
         // App
         NEXT_PUBLIC_APP_HOST: isDevelopment ? z.string().url().default('http://localhost:3000') : z.string().url(),
@@ -32,7 +34,7 @@ export const env = createEnv({
         // Vercel
         AI_GATEWAY_API_KEY: isDevelopment ? z.string() : z.string().optional(),
         // Supermemory
-        SUPERMEMORY_KEY: z.string().optional(),
+        SUPERMEMORY_KEY: z.string(),
         // Anthropic
         ANTHROPIC_API_KEY: z.string().optional(),
     },
