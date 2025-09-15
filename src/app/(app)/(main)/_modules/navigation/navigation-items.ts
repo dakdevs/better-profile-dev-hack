@@ -1,4 +1,4 @@
-import { Cog, Home, Speech, SquareEqual, Users, type LucideIcon } from 'lucide-react'
+import { Cog, Speech, SquareEqual, Users, type LucideIcon } from 'lucide-react'
 
 type NavigationItem = {
 	label: string
