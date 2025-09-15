@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { index, integer, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core'
+import { decimal, index, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core'
 
 import { timestamps } from '../utils'
 import { users } from './users'
@@ -17,8 +17,8 @@ export const jobPostings = pgTable(
 		requiredSkills: jsonb('required_skills'),
 		preferredSkills: jsonb('preferred_skills'),
 		experienceLevel: text('experience_level'),
-		salaryMin: integer('salary_min'),
-		salaryMax: integer('salary_max'),
+		salaryMin: decimal('salary_min'),
+		salaryMax: decimal('salary_max'),
 		...timestamps,
 	},
 	(table) => [index().on(table.userId), index().on(table.title), index().on(table.experienceLevel)],

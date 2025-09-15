@@ -15,13 +15,15 @@ export function InputField(props: InputFieldProps) {
 		message: string
 	}[]
 
-	const { label, description, ...inputProps } = props
+	const { disabled, ...inputProps } = props
+	const isLoading = field.form.state.isSubmitting
 
 	return (
 		<TextInput
 			{...inputProps}
 			error={errors[0]?.message}
 			value={field.state.value}
+			disabled={isLoading || disabled}
 			onChange={(event) => {
 				field.handleChange(event.target.value)
 			}}
