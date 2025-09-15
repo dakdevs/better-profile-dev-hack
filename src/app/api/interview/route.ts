@@ -7,6 +7,7 @@ import { serverConfig } from '~/config/server-config'
 import { db } from '~/db'
 import { interviewMessages } from '~/db/models'
 import { getRequiredSession } from '~/lib/auth'
+import { extractSkills } from '~/services/skills-extract'
 import { analyzeResponse } from '~/services/user-response-analysis'
 
 const INSTRUCTIONS = `Role
@@ -118,7 +119,7 @@ export async function POST(request: Request) {
 				if (role === 'user' && typeof content === 'string') {
 					console.warn('Analyzing user message:', content)
 
-					await analyzeMessage(content)
+					await extractSkills(content)
 				}
 			})
 		},

@@ -134,26 +134,8 @@ class SkillExtractionService {
 
 const skillExtractionService = new SkillExtractionService()
 
-export async function POST(req: NextRequest) {
-	try {
-		const body = await req.json().catch(() => ({}))
-		const { userQuery } = body as { userQuery?: string }
+export async function extractSkills(userQuery: string) {
+	const result = await skillExtractionService.extractSkills(userQuery, 'interview')
 
-		if (!userQuery || typeof userQuery !== 'string') {
-			return NextResponse.json(
-				{ error: 'userQuery parameter is required and must be a string' },
-				{ status: 400 },
-			)
-		}
-
-		console.log('🔍 Extracting skills from user query:', userQuery)
-		const result = await skillExtractionService.extractSkills(userQuery, 'interview')
-		console.log(`✅ Extracted ${result.totalSkillsFound} skills from query`)
-		console.log('📋 Skills found:', result.skills.map((s) => s.name).join(', '))
-
-		return new NextResponse(null, { status: 204 })
-	} catch (error) {
-		logger.error('❌ Failed to extract skills from user query:', error)
-		return NextResponse.json({ error: 'Failed to extract skills from user query' }, { status: 500 })
-	}
+	return result
 }
