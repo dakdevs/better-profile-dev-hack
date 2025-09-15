@@ -1,15 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server'
-
 import { serverConfig } from '~/config/server-config'
 
 // Minimal logger to mirror existing behavior
 const logger = {
-	info: (...args: any[]) => {
+	info: (...args: unknown[]) => {
 		console.log('[INFO]', ...args)
 	},
-	error: (...args: any[]) => {
+	error: (...args: unknown[]) => {
 		console.error('[ERROR]', ...args)
 	},
+}
+
+// Narrowing helpers
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null
+}
+
+type RawSkill = {
+	name: string
+	category?: unknown
+	confidence?: unknown
+}
+
+function isRawSkill(value: unknown): value is RawSkill {
+	return isRecord(value) && typeof value['name'] === 'string'
 }
 
 // Types used by extraction
@@ -22,7 +35,7 @@ type ExtractedSkill = {
 type ExtractionResult = {
 	skills: ExtractedSkill[]
 	totalSkillsFound: number
-	meta?: Record<string, any>
+	meta?: Record<string, unknown>
 }
 
 // Single-file service with the same API surface (caching removed)
@@ -71,10 +84,10 @@ class SkillExtractionService {
 
 		if (!resp.ok) {
 			const textErr = await resp.text().catch(() => '')
-			throw new Error(`Moonshot API error: ${resp.status} ${textErr}`)
+			throw new Error(`Moonshot API error: ${String(resp.status)} ${textErr}`)
 		}
 
-		const data = await resp.json()
+		const data: unknown = await resp.json()
 
 		return this.parseAISkillResponse(data)
 	}
@@ -92,18 +105,43 @@ class SkillExtractionService {
 		].join('\n')
 	}
 
-	private parseAISkillResponse(aiResponse: any): ExtractionResult {
+	private parseAISkillResponse(aiResponse: unknown): ExtractionResult {
 		let content: string | undefined
 		try {
-			const candidate =
-				aiResponse?.choices?.[0]?.message?.content
-				|| aiResponse?.choices?.[0]?.text
-				|| aiResponse?.message?.content
-				|| aiResponse?.content
-			content = typeof candidate === 'string' ? candidate : JSON.stringify(candidate)
-		} catch {}
+			if (isRecord(aiResponse)) {
+				const choicesVal = aiResponse['choices']
+				if (Array.isArray(choicesVal) && choicesVal.length > 0) {
+					const first: unknown = choicesVal[0]
+					if (isRecord(first)) {
+						const messageVal = first['message']
+						const message = isRecord(messageVal) ? messageVal : undefined
+						const rawMsgContent = message?.['content']
+						const messageContent = typeof rawMsgContent === 'string' ? rawMsgContent : undefined
+						const rawText = first['text']
+						const text = typeof rawText === 'string' ? rawText : undefined
+						content = messageContent ?? text
+					}
+				}
 
-		let parsed: any = {}
+				if (!content) {
+					const msgVal = aiResponse['message']
+					const message = isRecord(msgVal) ? msgVal : undefined
+					const rawMsgContent = message?.['content']
+					const messageContent = typeof rawMsgContent === 'string' ? rawMsgContent : undefined
+					const rawTop = aiResponse['content']
+					const topContent = typeof rawTop === 'string' ? rawTop : undefined
+					content = messageContent ?? topContent
+				}
+			}
+
+			if (!content) {
+				content = JSON.stringify(aiResponse)
+			}
+		} catch (err) {
+			logger.error('Failed to read AI response content', err)
+		}
+
+		let parsed: unknown = {}
 		try {
 			parsed = content ? JSON.parse(content) : {}
 		} catch {
@@ -113,26 +151,37 @@ class SkillExtractionService {
 				if (start !== -1 && end !== -1 && end > start) {
 					try {
 						parsed = JSON.parse(content.slice(start, end + 1))
-					} catch {
+					} catch (err) {
 						parsed = {}
+						logger.error('Failed to parse AI JSON after slicing', err)
 					}
 				}
 			}
 		}
 
-		const skillsRaw = Array.isArray(parsed?.skills) ? parsed.skills : []
-		const skills: ExtractedSkill[] = skillsRaw
-			.filter((s: any) => s && typeof s.name === 'string')
-			.map((s: any) => ({
-				name: s.name,
-				category: s.category,
-				confidence: typeof s.confidence === 'number' ? s.confidence : undefined,
-			}))
+		let skills: ExtractedSkill[] = []
+		let meta: Record<string, unknown> | undefined
+		if (isRecord(parsed)) {
+			const skillsRaw = Array.isArray(parsed['skills']) ? (parsed['skills'] as unknown[]) : []
+			skills = skillsRaw
+				.filter((s: unknown): s is RawSkill => isRawSkill(s))
+				.map((s) => {
+					const name = s.name
+					const category = typeof s.category === 'string' ? s.category : undefined
+					const confidence = typeof s.confidence === 'number' ? s.confidence : undefined
+
+					return { name, category, confidence }
+				})
+
+			if (isRecord(parsed['meta'])) {
+				meta = parsed['meta']
+			}
+		}
 
 		return {
 			skills,
 			totalSkillsFound: skills.length,
-			meta: { ...(parsed?.meta || {}) },
+			meta,
 		}
 	}
 }
