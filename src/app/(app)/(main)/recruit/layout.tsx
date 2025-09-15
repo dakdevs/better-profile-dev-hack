@@ -9,7 +9,7 @@ export default function RecruitLayout({ children }: { children: ReactNode }) {
 		<PageContainer
 			title="Recruit"
 			description="Recruit with Better Profile"
-			bannerImage="/images/matches-banner-v2.png"
+			bannerImage="/images/recruit-banner.png"
 			bannerImageClassName="object-top-right"
 		>
 			{children}
