@@ -2,7 +2,7 @@ import { after } from 'next/server'
 import { convertToModelMessages, streamText, UIMessage, validateUIMessages } from 'ai'
 import z from 'zod'
 
-import { createVercelGatewayWithSupermemory } from '~/ai/lib/vercel'
+import { createAnthropicGatewayWithSupermemory } from '~/ai/lib/anthropic'
 import { serverConfig } from '~/config/server-config'
 import { db } from '~/db'
 import { interviewMessages } from '~/db/models'
@@ -128,9 +128,9 @@ export async function POST(request: Request) {
 function getModel(userId: string) {
 	const { isDevelopment } = serverConfig.app
 	const envPrefix = isDevelopment ? 'dev' : 'prod'
-	const gateway = createVercelGatewayWithSupermemory(`${envPrefix}_user_${userId}`)
+	const gateway = createAnthropicGatewayWithSupermemory(`${envPrefix}_user_${userId}`)
 
-	return gateway('gpt-5-mini')
+	return gateway('claude-sonnet-4-20250514')
 }
 
 async function parseRequest(request: Request) {

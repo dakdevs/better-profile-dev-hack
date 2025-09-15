@@ -39,8 +39,8 @@ export default protectedBase
 			experienceLevel: parsed.result.experienceLevel,
 			extractedSkills: parsed.result.extractedSkills,
 			preferredSkills: parsed.result.preferredSkills,
-			salaryMin: parsed.result.salaryRange?.min,
-			salaryMax: parsed.result.salaryRange?.max,
+			salaryMin: String(parsed.result.salaryRange?.min) || null,
+			salaryMax: String(parsed.result.salaryRange?.max) || null,
 			requiredSkills: parsed.result.requiredSkills,
 		})
 	})

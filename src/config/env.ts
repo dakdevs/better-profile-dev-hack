@@ -31,6 +31,8 @@ export const env = createEnv({
 		AI_GATEWAY_API_KEY: isDevelopment ? z.string() : z.string().optional(),
 		// Supermemory
 		SUPERMEMORY_KEY: z.string(),
+		// Anthropic
+		ANTHROPIC_API_KEY: z.string(),
 	},
 	runtimeEnv: {
 		NEXT_PUBLIC_APP_HOST: process.env.NEXT_PUBLIC_APP_HOST,
@@ -46,6 +48,7 @@ export const env = createEnv({
 		CALCOM_ORGANIZATION_ID: process.env.CALCOM_ORGANIZATION_ID,
 		AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
 		SUPERMEMORY_KEY: process.env.SUPERMEMORY_KEY,
+		ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
 	},
 	emptyStringAsUndefined: true,
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,

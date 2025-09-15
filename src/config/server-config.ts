@@ -33,4 +33,7 @@ export const serverConfig = {
 	openRouter: {
 		apiKey: env.OPENROUTER_API_KEY,
 	},
+	anthropic: {
+		apiKey: env.ANTHROPIC_API_KEY,
+	},
 }
