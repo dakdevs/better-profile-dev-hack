@@ -1,6 +1,7 @@
 // src/db/models/recruiter.ts
-import { boolean, index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, index, integer, pgTable, text, uuid } from 'drizzle-orm/pg-core'
 
+import { timestamps } from '../utils'
 import { users } from './users'
 
 export const recruiterProfiles = pgTable(
@@ -21,8 +22,7 @@ export const recruiterProfiles = pgTable(
 		calComUserId: integer('cal_com_user_id'),
 		calComScheduleId: integer('cal_com_schedule_id'),
 		calComEventTypeId: integer('cal_com_event_type_id'),
-		createdAt: timestamp('created_at').notNull().defaultNow(),
-		updatedAt: timestamp('updated_at').notNull().defaultNow(),
+		...timestamps,
 	},
 	(table) => [
 		index('recruiter_profiles_user_idx').on(table.userId),

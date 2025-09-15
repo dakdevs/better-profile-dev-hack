@@ -1,5 +1,3 @@
-'use client'
-
 import { Reply } from 'lucide-react'
 import z from 'zod'
 
