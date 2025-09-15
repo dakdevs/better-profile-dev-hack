@@ -4,18 +4,18 @@
  */
 
 export {
-  ConversationGradingIntegration,
-  createConversationGradingIntegration,
-  convertChatMessagesToQAPairs,
-  createSimpleScoringStrategy,
-  createSimpleTopicAnalyzer
-} from './ConversationGradingIntegration';
+	ConversationGradingIntegration,
+	createConversationGradingIntegration,
+	convertChatMessagesToQAPairs,
+	createSimpleScoringStrategy,
+	createSimpleTopicAnalyzer,
+} from './ConversationGradingIntegration'
 
 export type {
-  ConversationMessage,
-  IntegrationConfig,
-  ProcessingResult
-} from './ConversationGradingIntegration';
+	ConversationMessage,
+	IntegrationConfig,
+	ProcessingResult,
+} from './ConversationGradingIntegration'
 
 // Re-export browser compatibility utilities if they exist
-export * from './browserCompatibility';
+export * from './browserCompatibility'

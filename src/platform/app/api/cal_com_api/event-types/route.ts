@@ -1,169 +1,189 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '~/lib/auth';
-import { db } from '~/db';
-import { recruiterProfiles } from '~/db/schema';
-import { eq } from 'drizzle-orm';
-import { serverConfig } from '~/config/server-config';
+import { NextRequest, NextResponse } from 'next/server'
+import { eq } from 'drizzle-orm'
+
+import { serverConfig } from '~/config/server-config'
+import { db } from '~/db'
+import { recruiterProfiles } from '~/db/schema'
+import { auth } from '~/lib/auth'
 
 export async function GET(request: NextRequest) {
-  try {
-    const session = await auth.api.getSession({
-      headers: request.headers
-    });
-    
-    if (!session?.user?.id) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
+	try {
+		const session = await auth.api.getSession({
+			headers: request.headers,
+		})
 
-    // Get recruiter profile
-    const recruiterProfile = await db
-      .select()
-      .from(recruiterProfiles)
-      .where(eq(recruiterProfiles.userId, session.user.id))
-      .limit(1);
+		if (!session?.user?.id) {
+			return new NextResponse('Unauthorized', { status: 401 })
+		}
 
-    if (recruiterProfile.length === 0 || !recruiterProfile[0].calComConnected) {
-      return NextResponse.json({
-        success: false,
-        error: 'Cal.com not connected'
-      }, { status: 400 });
-    }
+		// Get recruiter profile
+		const recruiterProfile = await db
+			.select()
+			.from(recruiterProfiles)
+			.where(eq(recruiterProfiles.userId, session.user.id))
+			.limit(1)
 
-    const profile = recruiterProfile[0];
-    const apiKey = profile.calComApiKey || serverConfig.cal.apiKey;
+		if (recruiterProfile.length === 0 || !recruiterProfile[0].calComConnected) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: 'Cal.com not connected',
+				},
+				{ status: 400 },
+			)
+		}
 
-    if (!apiKey) {
-      return NextResponse.json({
-        success: false,
-        error: 'Cal.com API key not available'
-      }, { status: 400 });
-    }
+		const profile = recruiterProfile[0]
+		const apiKey = profile.calComApiKey || serverConfig.cal.apiKey
 
-    // Fetch event types from Cal.com
-    const response = await fetch(`https://api.cal.com/v1/event-types?apiKey=${apiKey}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch event types: ${await response.text()}`);
-    }
+		if (!apiKey) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: 'Cal.com API key not available',
+				},
+				{ status: 400 },
+			)
+		}
 
-    const data = await response.json();
+		// Fetch event types from Cal.com
+		const response = await fetch(`https://api.cal.com/v1/event-types?apiKey=${apiKey}`)
 
-    return NextResponse.json({
-      success: true,
-      eventTypes: data.event_types || []
-    });
+		if (!response.ok) {
+			throw new Error(`Failed to fetch event types: ${await response.text()}`)
+		}
 
-  } catch (error) {
-    console.error('Error fetching event types:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to fetch event types'
-    }, { status: 500 });
-  }
+		const data = await response.json()
+
+		return NextResponse.json({
+			success: true,
+			eventTypes: data.event_types || [],
+		})
+	} catch (error) {
+		console.error('Error fetching event types:', error)
+		return NextResponse.json(
+			{
+				success: false,
+				error: 'Failed to fetch event types',
+			},
+			{ status: 500 },
+		)
+	}
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const session = await auth.api.getSession({
-      headers: request.headers
-    });
-    
-    if (!session?.user?.id) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
+	try {
+		const session = await auth.api.getSession({
+			headers: request.headers,
+		})
 
-    const { title, length, description, scheduleId } = await request.json();
+		if (!session?.user?.id) {
+			return new NextResponse('Unauthorized', { status: 401 })
+		}
 
-    if (!title || !length) {
-      return NextResponse.json({
-        success: false,
-        error: 'Title and length are required'
-      }, { status: 400 });
-    }
+		const { title, length, description, scheduleId } = await request.json()
 
-    // Get recruiter profile
-    const recruiterProfile = await db
-      .select()
-      .from(recruiterProfiles)
-      .where(eq(recruiterProfiles.userId, session.user.id))
-      .limit(1);
+		if (!title || !length) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: 'Title and length are required',
+				},
+				{ status: 400 },
+			)
+		}
 
-    if (recruiterProfile.length === 0 || !recruiterProfile[0].calComConnected) {
-      return NextResponse.json({
-        success: false,
-        error: 'Cal.com not connected'
-      }, { status: 400 });
-    }
+		// Get recruiter profile
+		const recruiterProfile = await db
+			.select()
+			.from(recruiterProfiles)
+			.where(eq(recruiterProfiles.userId, session.user.id))
+			.limit(1)
 
-    const profile = recruiterProfile[0];
-    const apiKey = profile.calComApiKey || serverConfig.cal.apiKey;
+		if (recruiterProfile.length === 0 || !recruiterProfile[0].calComConnected) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: 'Cal.com not connected',
+				},
+				{ status: 400 },
+			)
+		}
 
-    if (!apiKey) {
-      return NextResponse.json({
-        success: false,
-        error: 'Cal.com API key not available'
-      }, { status: 400 });
-    }
+		const profile = recruiterProfile[0]
+		const apiKey = profile.calComApiKey || serverConfig.cal.apiKey
 
-    // Create event type in Cal.com
-    const eventTypeData = {
-      title,
-      slug: `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`,
-      length: parseInt(length),
-      description: description || `Interview for ${title}`,
-      scheduleId: scheduleId || profile.calComScheduleId,
-      hidden: false,
-      metadata: {
-        createdBy: 'recruiter-platform',
-        recruiterId: profile.id,
-        userId: session.user.id
-      }
-    };
+		if (!apiKey) {
+			return NextResponse.json(
+				{
+					success: false,
+					error: 'Cal.com API key not available',
+				},
+				{ status: 400 },
+			)
+		}
 
-    const response = await fetch(`https://api.cal.com/v1/event-types?apiKey=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventTypeData),
-    });
+		// Create event type in Cal.com
+		const eventTypeData = {
+			title,
+			slug: `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`,
+			length: parseInt(length),
+			description: description || `Interview for ${title}`,
+			scheduleId: scheduleId || profile.calComScheduleId,
+			hidden: false,
+			metadata: {
+				createdBy: 'recruiter-platform',
+				recruiterId: profile.id,
+				userId: session.user.id,
+			},
+		}
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to create event type: ${errorText}`);
-    }
+		const response = await fetch(`https://api.cal.com/v1/event-types?apiKey=${apiKey}`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(eventTypeData),
+		})
 
-    const data = await response.json();
-    const eventType = data.event_type;
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(`Failed to create event type: ${errorText}`)
+		}
 
-    // Update recruiter profile with the new event type ID if this is their first one
-    if (!profile.calComEventTypeId) {
-      await db
-        .update(recruiterProfiles)
-        .set({
-          calComEventTypeId: eventType.id,
-          updatedAt: new Date(),
-        })
-        .where(eq(recruiterProfiles.id, profile.id));
-    }
+		const data = await response.json()
+		const eventType = data.event_type
 
-    return NextResponse.json({
-      success: true,
-      eventType: {
-        id: eventType.id,
-        title: eventType.title,
-        slug: eventType.slug,
-        length: eventType.length,
-        description: eventType.description,
-        hidden: eventType.hidden,
-      }
-    });
+		// Update recruiter profile with the new event type ID if this is their first one
+		if (!profile.calComEventTypeId) {
+			await db
+				.update(recruiterProfiles)
+				.set({
+					calComEventTypeId: eventType.id,
+					updatedAt: new Date(),
+				})
+				.where(eq(recruiterProfiles.id, profile.id))
+		}
 
-  } catch (error) {
-    console.error('Error creating event type:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to create event type'
-    }, { status: 500 });
-  }
+		return NextResponse.json({
+			success: true,
+			eventType: {
+				id: eventType.id,
+				title: eventType.title,
+				slug: eventType.slug,
+				length: eventType.length,
+				description: eventType.description,
+				hidden: eventType.hidden,
+			},
+		})
+	} catch (error) {
+		console.error('Error creating event type:', error)
+		return NextResponse.json(
+			{
+				success: false,
+				error: error instanceof Error ? error.message : 'Failed to create event type',
+			},
+			{ status: 500 },
+		)
+	}
 }

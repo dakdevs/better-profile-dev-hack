@@ -1,1 +1,1 @@
-export { useSpeechRecognition } from './useSpeechRecognition';
+export { useSpeechRecognition } from './useSpeechRecognition'

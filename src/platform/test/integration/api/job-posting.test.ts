@@ -1,397 +1,401 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { NextRequest } from 'next/server';
-import { GET, POST } from '~/app/api/recruiter/jobs/route';
-import { GET as GetJobById, PUT, DELETE } from '~/app/api/recruiter/jobs/[id]/route';
-import { db } from '~/db';
+import { NextRequest } from 'next/server'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { DELETE, GET as GetJobById, PUT } from '~/app/api/recruiter/jobs/[id]/route'
+import { GET, POST } from '~/app/api/recruiter/jobs/route'
+import { db } from '~/db'
 
 // Mock the auth module
 vi.mock('~/lib/auth', () => ({
-  auth: {
-    api: vi.fn().mockReturnValue({
-      getSession: vi.fn().mockResolvedValue({
-        user: { id: 'test-user-id' }
-      })
-    })
-  }
-}));
+	auth: {
+		api: vi.fn().mockReturnValue({
+			getSession: vi.fn().mockResolvedValue({
+				user: { id: 'test-user-id' },
+			}),
+		}),
+	},
+}))
 
 // Mock the database
 vi.mock('~/db', () => ({
-  db: {
-    select: vi.fn(),
-    insert: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn()
-  }
-}));
+	db: {
+		select: vi.fn(),
+		insert: vi.fn(),
+		update: vi.fn(),
+		delete: vi.fn(),
+	},
+}))
 
 // Mock the job analysis service
 vi.mock('~/services/job-analysis', () => ({
-  JobAnalysisService: vi.fn().mockImplementation(() => ({
-    analyzeJobPosting: vi.fn().mockResolvedValue({
-      requiredSkills: ['JavaScript', 'React', 'Node.js'],
-      preferredSkills: ['TypeScript', 'Next.js'],
-      experienceLevel: 'mid',
-      salaryRange: { min: 80000, max: 120000 },
-      confidence: 0.85,
-      extractedData: {
-        location: 'Remote',
-        employmentType: 'full-time'
-      }
-    })
-  }))
-}));
+	JobAnalysisService: vi.fn().mockImplementation(() => ({
+		analyzeJobPosting: vi.fn().mockResolvedValue({
+			requiredSkills: ['JavaScript', 'React', 'Node.js'],
+			preferredSkills: ['TypeScript', 'Next.js'],
+			experienceLevel: 'mid',
+			salaryRange: { min: 80000, max: 120000 },
+			confidence: 0.85,
+			extractedData: {
+				location: 'Remote',
+				employmentType: 'full-time',
+			},
+		}),
+	})),
+}))
 
 describe('Job Posting API Integration Tests', () => {
-  const mockJobPosting = {
-    id: 'test-job-id',
-    recruiterId: 'test-recruiter-id',
-    title: 'Senior Software Engineer',
-    rawDescription: 'We are looking for a senior software engineer...',
-    extractedSkills: ['JavaScript', 'React', 'Node.js'],
-    requiredSkills: ['JavaScript', 'React'],
-    preferredSkills: ['TypeScript', 'Next.js'],
-    experienceLevel: 'senior',
-    salaryMin: 80000,
-    salaryMax: 120000,
-    location: 'Remote',
-    remoteAllowed: true,
-    employmentType: 'full-time',
-    status: 'active',
-    aiConfidenceScore: 0.85,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
+	const mockJobPosting = {
+		id: 'test-job-id',
+		recruiterId: 'test-recruiter-id',
+		title: 'Senior Software Engineer',
+		rawDescription: 'We are looking for a senior software engineer...',
+		extractedSkills: ['JavaScript', 'React', 'Node.js'],
+		requiredSkills: ['JavaScript', 'React'],
+		preferredSkills: ['TypeScript', 'Next.js'],
+		experienceLevel: 'senior',
+		salaryMin: 80000,
+		salaryMax: 120000,
+		location: 'Remote',
+		remoteAllowed: true,
+		employmentType: 'full-time',
+		status: 'active',
+		aiConfidenceScore: 0.85,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	}
 
-  const mockRecruiterProfile = {
-    id: 'test-recruiter-id',
-    userId: 'test-user-id',
-    organizationName: 'Test Company',
-    recruitingFor: 'Software Engineers'
-  };
+	const mockRecruiterProfile = {
+		id: 'test-recruiter-id',
+		userId: 'test-user-id',
+		organizationName: 'Test Company',
+		recruitingFor: 'Software Engineers',
+	}
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+	beforeEach(() => {
+		vi.clearAllMocks()
+	})
 
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
+	afterEach(() => {
+		vi.resetAllMocks()
+	})
 
-  describe('GET /api/recruiter/jobs', () => {
-    it('should return job postings for authenticated recruiter', async () => {
-      // Mock recruiter profile lookup
-      const mockRecruiterResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockResolvedValue([mockRecruiterProfile])
-      };
-      
-      // Mock job postings lookup
-      const mockJobsResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        orderBy: vi.fn().mockResolvedValue([mockJobPosting])
-      };
+	describe('GET /api/recruiter/jobs', () => {
+		it('should return job postings for authenticated recruiter', async () => {
+			// Mock recruiter profile lookup
+			const mockRecruiterResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockResolvedValue([mockRecruiterProfile]),
+			}
 
-      (db.select as any)
-        .mockReturnValueOnce(mockRecruiterResponse)
-        .mockReturnValueOnce(mockJobsResponse);
+			// Mock job postings lookup
+			const mockJobsResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockReturnThis(),
+				orderBy: vi.fn().mockResolvedValue([mockJobPosting]),
+			}
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs');
-      const response = await GET(request);
-      const data = await response.json();
+			;(db.select as any)
+				.mockReturnValueOnce(mockRecruiterResponse)
+				.mockReturnValueOnce(mockJobsResponse)
 
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      expect(data.data).toHaveLength(1);
-      expect(data.data[0]).toEqual(mockJobPosting);
-    });
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs')
+			const response = await GET(request)
+			const data = await response.json()
 
-    it('should return empty array when no jobs exist', async () => {
-      // Mock recruiter profile lookup
-      const mockRecruiterResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockResolvedValue([mockRecruiterProfile])
-      };
-      
-      // Mock empty job postings lookup
-      const mockJobsResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        orderBy: vi.fn().mockResolvedValue([])
-      };
+			expect(response.status).toBe(200)
+			expect(data.success).toBe(true)
+			expect(data.data).toHaveLength(1)
+			expect(data.data[0]).toEqual(mockJobPosting)
+		})
 
-      (db.select as any)
-        .mockReturnValueOnce(mockRecruiterResponse)
-        .mockReturnValueOnce(mockJobsResponse);
+		it('should return empty array when no jobs exist', async () => {
+			// Mock recruiter profile lookup
+			const mockRecruiterResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockResolvedValue([mockRecruiterProfile]),
+			}
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs');
-      const response = await GET(request);
-      const data = await response.json();
+			// Mock empty job postings lookup
+			const mockJobsResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockReturnThis(),
+				orderBy: vi.fn().mockResolvedValue([]),
+			}
 
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      expect(data.data).toHaveLength(0);
-    });
+			;(db.select as any)
+				.mockReturnValueOnce(mockRecruiterResponse)
+				.mockReturnValueOnce(mockJobsResponse)
 
-    it('should return 404 when recruiter profile not found', async () => {
-      // Mock empty recruiter profile lookup
-      const mockRecruiterResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockResolvedValue([])
-      };
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs')
+			const response = await GET(request)
+			const data = await response.json()
 
-      (db.select as any).mockReturnValue(mockRecruiterResponse);
+			expect(response.status).toBe(200)
+			expect(data.success).toBe(true)
+			expect(data.data).toHaveLength(0)
+		})
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs');
-      const response = await GET(request);
-      const data = await response.json();
+		it('should return 404 when recruiter profile not found', async () => {
+			// Mock empty recruiter profile lookup
+			const mockRecruiterResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockResolvedValue([]),
+			}
 
-      expect(response.status).toBe(404);
-      expect(data.success).toBe(false);
-      expect(data.error).toBe('Recruiter profile not found');
-    });
-  });
+			;(db.select as any).mockReturnValue(mockRecruiterResponse)
 
-  describe('POST /api/recruiter/jobs', () => {
-    const validJobData = {
-      title: 'Senior Software Engineer',
-      description: 'We are looking for a senior software engineer with experience in React and Node.js...',
-      location: 'Remote',
-      remoteAllowed: true,
-      employmentType: 'full-time',
-      salaryMin: 80000,
-      salaryMax: 120000
-    };
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs')
+			const response = await GET(request)
+			const data = await response.json()
 
-    it('should create job posting with AI analysis', async () => {
-      // Mock recruiter profile lookup
-      const mockRecruiterResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockResolvedValue([mockRecruiterProfile])
-      };
+			expect(response.status).toBe(404)
+			expect(data.success).toBe(false)
+			expect(data.error).toBe('Recruiter profile not found')
+		})
+	})
 
-      // Mock job insertion
-      const mockInsertResponse = {
-        into: vi.fn().mockReturnThis(),
-        values: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([mockJobPosting])
-      };
+	describe('POST /api/recruiter/jobs', () => {
+		const validJobData = {
+			title: 'Senior Software Engineer',
+			description:
+				'We are looking for a senior software engineer with experience in React and Node.js...',
+			location: 'Remote',
+			remoteAllowed: true,
+			employmentType: 'full-time',
+			salaryMin: 80000,
+			salaryMax: 120000,
+		}
 
-      (db.select as any).mockReturnValue(mockRecruiterResponse);
-      (db.insert as any).mockReturnValue(mockInsertResponse);
+		it('should create job posting with AI analysis', async () => {
+			// Mock recruiter profile lookup
+			const mockRecruiterResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockResolvedValue([mockRecruiterProfile]),
+			}
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs', {
-        method: 'POST',
-        body: JSON.stringify(validJobData),
-        headers: { 'Content-Type': 'application/json' }
-      });
+			// Mock job insertion
+			const mockInsertResponse = {
+				into: vi.fn().mockReturnThis(),
+				values: vi.fn().mockReturnThis(),
+				returning: vi.fn().mockResolvedValue([mockJobPosting]),
+			}
 
-      const response = await POST(request);
-      const data = await response.json();
+			;(db.select as any).mockReturnValue(mockRecruiterResponse)
+			;(db.insert as any).mockReturnValue(mockInsertResponse)
 
-      expect(response.status).toBe(201);
-      expect(data.success).toBe(true);
-      expect(data.data.job).toEqual(mockJobPosting);
-      expect(data.data.extractedData).toBeDefined();
-      expect(data.data.extractedData.skills).toContain('JavaScript');
-    });
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs', {
+				method: 'POST',
+				body: JSON.stringify(validJobData),
+				headers: { 'Content-Type': 'application/json' },
+			})
 
-    it('should handle AI analysis failure gracefully', async () => {
-      // Mock recruiter profile lookup
-      const mockRecruiterResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockResolvedValue([mockRecruiterProfile])
-      };
+			const response = await POST(request)
+			const data = await response.json()
 
-      // Mock AI service failure
-      const { JobAnalysisService } = await import('~/services/job-analysis');
-      const mockAnalysisService = new JobAnalysisService();
-      (mockAnalysisService.analyzeJobPosting as any).mockRejectedValue(new Error('AI service unavailable'));
+			expect(response.status).toBe(201)
+			expect(data.success).toBe(true)
+			expect(data.data.job).toEqual(mockJobPosting)
+			expect(data.data.extractedData).toBeDefined()
+			expect(data.data.extractedData.skills).toContain('JavaScript')
+		})
 
-      // Mock job insertion with fallback data
-      const jobWithoutAI = { ...mockJobPosting, aiConfidenceScore: null, extractedSkills: [] };
-      const mockInsertResponse = {
-        into: vi.fn().mockReturnThis(),
-        values: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([jobWithoutAI])
-      };
+		it('should handle AI analysis failure gracefully', async () => {
+			// Mock recruiter profile lookup
+			const mockRecruiterResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockResolvedValue([mockRecruiterProfile]),
+			}
 
-      (db.select as any).mockReturnValue(mockRecruiterResponse);
-      (db.insert as any).mockReturnValue(mockInsertResponse);
+			// Mock AI service failure
+			const { JobAnalysisService } = await import('~/services/job-analysis')
+			const mockAnalysisService = new JobAnalysisService()
+			;(mockAnalysisService.analyzeJobPosting as any).mockRejectedValue(
+				new Error('AI service unavailable'),
+			)
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs', {
-        method: 'POST',
-        body: JSON.stringify(validJobData),
-        headers: { 'Content-Type': 'application/json' }
-      });
+			// Mock job insertion with fallback data
+			const jobWithoutAI = { ...mockJobPosting, aiConfidenceScore: null, extractedSkills: [] }
+			const mockInsertResponse = {
+				into: vi.fn().mockReturnThis(),
+				values: vi.fn().mockReturnThis(),
+				returning: vi.fn().mockResolvedValue([jobWithoutAI]),
+			}
 
-      const response = await POST(request);
-      const data = await response.json();
+			;(db.select as any).mockReturnValue(mockRecruiterResponse)
+			;(db.insert as any).mockReturnValue(mockInsertResponse)
 
-      expect(response.status).toBe(201);
-      expect(data.success).toBe(true);
-      expect(data.data.job.aiConfidenceScore).toBeNull();
-    });
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs', {
+				method: 'POST',
+				body: JSON.stringify(validJobData),
+				headers: { 'Content-Type': 'application/json' },
+			})
 
-    it('should return 400 with invalid job data', async () => {
-      const invalidJobData = {
-        title: '', // Empty required field
-        description: 'Valid description'
-      };
+			const response = await POST(request)
+			const data = await response.json()
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs', {
-        method: 'POST',
-        body: JSON.stringify(invalidJobData),
-        headers: { 'Content-Type': 'application/json' }
-      });
+			expect(response.status).toBe(201)
+			expect(data.success).toBe(true)
+			expect(data.data.job.aiConfidenceScore).toBeNull()
+		})
 
-      const response = await POST(request);
-      const data = await response.json();
+		it('should return 400 with invalid job data', async () => {
+			const invalidJobData = {
+				title: '', // Empty required field
+				description: 'Valid description',
+			}
 
-      expect(response.status).toBe(400);
-      expect(data.success).toBe(false);
-      expect(data.error).toContain('validation');
-    });
-  });
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs', {
+				method: 'POST',
+				body: JSON.stringify(invalidJobData),
+				headers: { 'Content-Type': 'application/json' },
+			})
 
-  describe('GET /api/recruiter/jobs/[id]', () => {
-    it('should return specific job posting', async () => {
-      // Mock job lookup
-      const mockJobResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockResolvedValue([mockJobPosting])
-      };
+			const response = await POST(request)
+			const data = await response.json()
 
-      (db.select as any).mockReturnValue(mockJobResponse);
+			expect(response.status).toBe(400)
+			expect(data.success).toBe(false)
+			expect(data.error).toContain('validation')
+		})
+	})
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/test-job-id');
-      const response = await GetJobById(request, { params: { id: 'test-job-id' } });
-      const data = await response.json();
+	describe('GET /api/recruiter/jobs/[id]', () => {
+		it('should return specific job posting', async () => {
+			// Mock job lookup
+			const mockJobResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockResolvedValue([mockJobPosting]),
+			}
 
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      expect(data.data).toEqual(mockJobPosting);
-    });
+			;(db.select as any).mockReturnValue(mockJobResponse)
 
-    it('should return 404 when job not found', async () => {
-      // Mock empty job lookup
-      const mockJobResponse = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockResolvedValue([])
-      };
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/test-job-id')
+			const response = await GetJobById(request, { params: { id: 'test-job-id' } })
+			const data = await response.json()
 
-      (db.select as any).mockReturnValue(mockJobResponse);
+			expect(response.status).toBe(200)
+			expect(data.success).toBe(true)
+			expect(data.data).toEqual(mockJobPosting)
+		})
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/nonexistent-id');
-      const response = await GetJobById(request, { params: { id: 'nonexistent-id' } });
-      const data = await response.json();
+		it('should return 404 when job not found', async () => {
+			// Mock empty job lookup
+			const mockJobResponse = {
+				from: vi.fn().mockReturnThis(),
+				where: vi.fn().mockResolvedValue([]),
+			}
 
-      expect(response.status).toBe(404);
-      expect(data.success).toBe(false);
-      expect(data.error).toBe('Job posting not found');
-    });
-  });
+			;(db.select as any).mockReturnValue(mockJobResponse)
 
-  describe('PUT /api/recruiter/jobs/[id]', () => {
-    const updateData = {
-      title: 'Updated Job Title',
-      salaryMax: 130000
-    };
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/nonexistent-id')
+			const response = await GetJobById(request, { params: { id: 'nonexistent-id' } })
+			const data = await response.json()
 
-    it('should update job posting', async () => {
-      const updatedJob = { ...mockJobPosting, ...updateData };
+			expect(response.status).toBe(404)
+			expect(data.success).toBe(false)
+			expect(data.error).toBe('Job posting not found')
+		})
+	})
 
-      // Mock job update
-      const mockUpdateResponse = {
-        set: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([updatedJob])
-      };
+	describe('PUT /api/recruiter/jobs/[id]', () => {
+		const updateData = {
+			title: 'Updated Job Title',
+			salaryMax: 130000,
+		}
 
-      (db.update as any).mockReturnValue(mockUpdateResponse);
+		it('should update job posting', async () => {
+			const updatedJob = { ...mockJobPosting, ...updateData }
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/test-job-id', {
-        method: 'PUT',
-        body: JSON.stringify(updateData),
-        headers: { 'Content-Type': 'application/json' }
-      });
+			// Mock job update
+			const mockUpdateResponse = {
+				set: vi.fn().mockReturnThis(),
+				where: vi.fn().mockReturnThis(),
+				returning: vi.fn().mockResolvedValue([updatedJob]),
+			}
 
-      const response = await PUT(request, { params: { id: 'test-job-id' } });
-      const data = await response.json();
+			;(db.update as any).mockReturnValue(mockUpdateResponse)
 
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      expect(data.data.title).toBe(updateData.title);
-      expect(data.data.salaryMax).toBe(updateData.salaryMax);
-    });
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/test-job-id', {
+				method: 'PUT',
+				body: JSON.stringify(updateData),
+				headers: { 'Content-Type': 'application/json' },
+			})
 
-    it('should return 404 when job not found for update', async () => {
-      // Mock empty update response
-      const mockUpdateResponse = {
-        set: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([])
-      };
+			const response = await PUT(request, { params: { id: 'test-job-id' } })
+			const data = await response.json()
 
-      (db.update as any).mockReturnValue(mockUpdateResponse);
+			expect(response.status).toBe(200)
+			expect(data.success).toBe(true)
+			expect(data.data.title).toBe(updateData.title)
+			expect(data.data.salaryMax).toBe(updateData.salaryMax)
+		})
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/nonexistent-id', {
-        method: 'PUT',
-        body: JSON.stringify(updateData),
-        headers: { 'Content-Type': 'application/json' }
-      });
+		it('should return 404 when job not found for update', async () => {
+			// Mock empty update response
+			const mockUpdateResponse = {
+				set: vi.fn().mockReturnThis(),
+				where: vi.fn().mockReturnThis(),
+				returning: vi.fn().mockResolvedValue([]),
+			}
 
-      const response = await PUT(request, { params: { id: 'nonexistent-id' } });
-      const data = await response.json();
+			;(db.update as any).mockReturnValue(mockUpdateResponse)
 
-      expect(response.status).toBe(404);
-      expect(data.success).toBe(false);
-      expect(data.error).toBe('Job posting not found');
-    });
-  });
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/nonexistent-id', {
+				method: 'PUT',
+				body: JSON.stringify(updateData),
+				headers: { 'Content-Type': 'application/json' },
+			})
 
-  describe('DELETE /api/recruiter/jobs/[id]', () => {
-    it('should delete job posting', async () => {
-      // Mock job deletion
-      const mockDeleteResponse = {
-        where: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([mockJobPosting])
-      };
+			const response = await PUT(request, { params: { id: 'nonexistent-id' } })
+			const data = await response.json()
 
-      (db.delete as any).mockReturnValue(mockDeleteResponse);
+			expect(response.status).toBe(404)
+			expect(data.success).toBe(false)
+			expect(data.error).toBe('Job posting not found')
+		})
+	})
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/test-job-id', {
-        method: 'DELETE'
-      });
+	describe('DELETE /api/recruiter/jobs/[id]', () => {
+		it('should delete job posting', async () => {
+			// Mock job deletion
+			const mockDeleteResponse = {
+				where: vi.fn().mockReturnThis(),
+				returning: vi.fn().mockResolvedValue([mockJobPosting]),
+			}
 
-      const response = await DELETE(request, { params: { id: 'test-job-id' } });
-      const data = await response.json();
+			;(db.delete as any).mockReturnValue(mockDeleteResponse)
 
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      expect(data.message).toBe('Job posting deleted successfully');
-    });
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/test-job-id', {
+				method: 'DELETE',
+			})
 
-    it('should return 404 when job not found for deletion', async () => {
-      // Mock empty deletion response
-      const mockDeleteResponse = {
-        where: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([])
-      };
+			const response = await DELETE(request, { params: { id: 'test-job-id' } })
+			const data = await response.json()
 
-      (db.delete as any).mockReturnValue(mockDeleteResponse);
+			expect(response.status).toBe(200)
+			expect(data.success).toBe(true)
+			expect(data.message).toBe('Job posting deleted successfully')
+		})
 
-      const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/nonexistent-id', {
-        method: 'DELETE'
-      });
+		it('should return 404 when job not found for deletion', async () => {
+			// Mock empty deletion response
+			const mockDeleteResponse = {
+				where: vi.fn().mockReturnThis(),
+				returning: vi.fn().mockResolvedValue([]),
+			}
 
-      const response = await DELETE(request, { params: { id: 'nonexistent-id' } });
-      const data = await response.json();
+			;(db.delete as any).mockReturnValue(mockDeleteResponse)
 
-      expect(response.status).toBe(404);
-      expect(data.success).toBe(false);
-      expect(data.error).toBe('Job posting not found');
-    });
-  });
-});
+			const request = new NextRequest('http://localhost:3000/api/recruiter/jobs/nonexistent-id', {
+				method: 'DELETE',
+			})
+
+			const response = await DELETE(request, { params: { id: 'nonexistent-id' } })
+			const data = await response.json()
+
+			expect(response.status).toBe(404)
+			expect(data.success).toBe(false)
+			expect(data.error).toBe('Job posting not found')
+		})
+	})
+})

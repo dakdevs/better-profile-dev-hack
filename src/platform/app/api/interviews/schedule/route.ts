@@ -1,56 +1,56 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '~/lib/auth';
-import { interviewSchedulingService } from '~/services/interview-scheduling';
-import { ScheduleInterviewRequest } from '~/types/interview-management';
-import { scheduleInterviewSchema, validateAndSanitize } from '~/lib/validation';
-import { withErrorHandling } from '~/lib/error-handler';
-import { ValidationError, AuthenticationError, AuthorizationError } from '~/lib/errors';
-import { db } from '~/db';
-import { recruiterProfiles } from '~/db/schema';
-import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server'
+import { eq } from 'drizzle-orm'
+
+import { db } from '~/db'
+import { recruiterProfiles } from '~/db/schema'
+import { auth } from '~/lib/auth'
+import { withErrorHandling } from '~/lib/error-handler'
+import { AuthenticationError, AuthorizationError, ValidationError } from '~/lib/errors'
+import { scheduleInterviewSchema, validateAndSanitize } from '~/lib/validation'
+import { interviewSchedulingService } from '~/services/interview-scheduling'
+import { ScheduleInterviewRequest } from '~/types/interview-management'
 
 /**
  * POST /api/interviews/schedule - Schedule a new interview
  */
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  console.log('[INTERVIEWS-SCHEDULE-API] Starting interview scheduling');
-  
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-  
-  if (!session?.user?.id) {
-    console.log('[INTERVIEWS-SCHEDULE-API] ERROR: No authenticated user');
-    throw new AuthenticationError('Authentication required');
-  }
-  console.log('[INTERVIEWS-SCHEDULE-API] Authenticated user:', session.user.id);
+	console.log('[INTERVIEWS-SCHEDULE-API] Starting interview scheduling')
 
-  const body = await request.json();
-  
-  // Validate and sanitize request body
-  const scheduleRequest = validateAndSanitize(
-    scheduleInterviewSchema,
-    body,
-    'schedule interview request'
-  );
+	const session = await auth.api.getSession({
+		headers: request.headers,
+	})
 
-  // Get recruiter profile to get the recruiter ID
-  const [recruiterProfile] = await db.select()
-    .from(recruiterProfiles)
-    .where(eq(recruiterProfiles.userId, session.user.id))
-    .limit(1);
+	if (!session?.user?.id) {
+		console.log('[INTERVIEWS-SCHEDULE-API] ERROR: No authenticated user')
+		throw new AuthenticationError('Authentication required')
+	}
+	console.log('[INTERVIEWS-SCHEDULE-API] Authenticated user:', session.user.id)
 
-  if (!recruiterProfile) {
-    throw new AuthorizationError(
-      'Recruiter profile not found. Please complete your profile first.'
-    );
-  }
+	const body = await request.json()
 
-  // Schedule the interview
-  const result = await interviewSchedulingService.scheduleInterview(
-    recruiterProfile.id,
-    scheduleRequest
-  );
+	// Validate and sanitize request body
+	const scheduleRequest = validateAndSanitize(
+		scheduleInterviewSchema,
+		body,
+		'schedule interview request',
+	)
 
-  return NextResponse.json(result, { status: 200 });
-});
+	// Get recruiter profile to get the recruiter ID
+	const [recruiterProfile] = await db
+		.select()
+		.from(recruiterProfiles)
+		.where(eq(recruiterProfiles.userId, session.user.id))
+		.limit(1)
+
+	if (!recruiterProfile) {
+		throw new AuthorizationError('Recruiter profile not found. Please complete your profile first.')
+	}
+
+	// Schedule the interview
+	const result = await interviewSchedulingService.scheduleInterview(
+		recruiterProfile.id,
+		scheduleRequest,
+	)
+
+	return NextResponse.json(result, { status: 200 })
+})

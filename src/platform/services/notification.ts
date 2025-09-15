@@ -1,58 +1,65 @@
-import { db } from '~/db';
-import { interviewNotifications, user, recruiterProfiles, jobPostings, interviewSessionsScheduled } from '~/db/schema';
-import { eq, and, desc, inArray } from 'drizzle-orm';
-import { 
-  InterviewNotification, 
-  NotificationType, 
-  NotificationData,
-  NotificationPreferences,
-  InterviewSession,
-  JobPosting,
-  RecruiterProfile
-} from '~/types/interview-management';
-import { serverConfig } from '~/config/server-config';
-import { logger, withLogging } from '~/lib/logger';
-import { interviewMonitoring } from '~/lib/monitoring';
-import { withServiceErrorHandling } from '~/lib/error-handler';
-import { ValidationError, NotFoundError, DatabaseError } from '~/lib/errors';
+import { and, desc, eq, inArray } from 'drizzle-orm'
+
+import { serverConfig } from '~/config/server-config'
+import { db } from '~/db'
+import {
+	interviewNotifications,
+	interviewSessionsScheduled,
+	jobPostings,
+	recruiterProfiles,
+	user,
+} from '~/db/schema'
+import { withServiceErrorHandling } from '~/lib/error-handler'
+import { DatabaseError, NotFoundError, ValidationError } from '~/lib/errors'
+import { logger, withLogging } from '~/lib/logger'
+import { interviewMonitoring } from '~/lib/monitoring'
+import {
+	InterviewNotification,
+	InterviewSession,
+	JobPosting,
+	NotificationData,
+	NotificationPreferences,
+	NotificationType,
+	RecruiterProfile,
+} from '~/types/interview-management'
 
 // Email service interface
 interface EmailService {
-  sendEmail(to: string, subject: string, html: string): Promise<boolean>;
+	sendEmail(to: string, subject: string, html: string): Promise<boolean>
 }
 
 // Simple email service implementation (can be replaced with SendGrid, etc.)
 class SimpleEmailService implements EmailService {
-  async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-    try {
-      // In a real implementation, you would use a service like SendGrid, AWS SES, etc.
-      console.log(`Email would be sent to: ${to}`);
-      console.log(`Subject: ${subject}`);
-      console.log(`HTML: ${html}`);
-      
-      // For now, just log and return true
-      // TODO: Implement actual email sending
-      return true;
-    } catch (error) {
-      console.error('Failed to send email:', error);
-      return false;
-    }
-  }
+	async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+		try {
+			// In a real implementation, you would use a service like SendGrid, AWS SES, etc.
+			console.log(`Email would be sent to: ${to}`)
+			console.log(`Subject: ${subject}`)
+			console.log(`HTML: ${html}`)
+
+			// For now, just log and return true
+			// TODO: Implement actual email sending
+			return true
+		} catch (error) {
+			console.error('Failed to send email:', error)
+			return false
+		}
+	}
 }
 
 // Notification templates
 interface NotificationTemplate {
-  subject: string;
-  html: string;
-  inAppTitle: string;
-  inAppMessage: string;
+	subject: string
+	html: string
+	inAppTitle: string
+	inAppMessage: string
 }
 
 class NotificationTemplateService {
-  private templates: Record<NotificationType, (data: NotificationData) => NotificationTemplate> = {
-    interview_scheduled: (data) => ({
-      subject: `Interview Scheduled - ${data.jobTitle}`,
-      html: `
+	private templates: Record<NotificationType, (data: NotificationData) => NotificationTemplate> = {
+		interview_scheduled: (data) => ({
+			subject: `Interview Scheduled - ${data.jobTitle}`,
+			html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #007AFF;">Interview Scheduled</h2>
           <p>Hello,</p>
@@ -66,13 +73,13 @@ class NotificationTemplateService {
           <p>Best regards,<br>The Interview Team</p>
         </div>
       `,
-      inAppTitle: 'Interview Scheduled',
-      inAppMessage: `Your interview for ${data.jobTitle} has been scheduled${data.scheduledTime ? ` for ${new Date(data.scheduledTime).toLocaleDateString()}` : ''}.`
-    }),
+			inAppTitle: 'Interview Scheduled',
+			inAppMessage: `Your interview for ${data.jobTitle} has been scheduled${data.scheduledTime ? ` for ${new Date(data.scheduledTime).toLocaleDateString()}` : ''}.`,
+		}),
 
-    interview_confirmed: (data) => ({
-      subject: `Interview Confirmed - ${data.jobTitle}`,
-      html: `
+		interview_confirmed: (data) => ({
+			subject: `Interview Confirmed - ${data.jobTitle}`,
+			html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #34C759;">Interview Confirmed</h2>
           <p>Hello,</p>
@@ -86,13 +93,13 @@ class NotificationTemplateService {
           <p>Best regards,<br>The Interview Team</p>
         </div>
       `,
-      inAppTitle: 'Interview Confirmed',
-      inAppMessage: `Your interview for ${data.jobTitle} has been confirmed${data.scheduledTime ? ` for ${new Date(data.scheduledTime).toLocaleDateString()}` : ''}.`
-    }),
+			inAppTitle: 'Interview Confirmed',
+			inAppMessage: `Your interview for ${data.jobTitle} has been confirmed${data.scheduledTime ? ` for ${new Date(data.scheduledTime).toLocaleDateString()}` : ''}.`,
+		}),
 
-    interview_cancelled: (data) => ({
-      subject: `Interview Cancelled - ${data.jobTitle}`,
-      html: `
+		interview_cancelled: (data) => ({
+			subject: `Interview Cancelled - ${data.jobTitle}`,
+			html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #FF3B30;">Interview Cancelled</h2>
           <p>Hello,</p>
@@ -102,13 +109,13 @@ class NotificationTemplateService {
           <p>Best regards,<br>The Interview Team</p>
         </div>
       `,
-      inAppTitle: 'Interview Cancelled',
-      inAppMessage: `Your interview for ${data.jobTitle} has been cancelled${data.reason ? `: ${data.reason}` : ''}.`
-    }),
+			inAppTitle: 'Interview Cancelled',
+			inAppMessage: `Your interview for ${data.jobTitle} has been cancelled${data.reason ? `: ${data.reason}` : ''}.`,
+		}),
 
-    interview_rescheduled: (data) => ({
-      subject: `Interview Rescheduled - ${data.jobTitle}`,
-      html: `
+		interview_rescheduled: (data) => ({
+			subject: `Interview Rescheduled - ${data.jobTitle}`,
+			html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #FF9500;">Interview Rescheduled</h2>
           <p>Hello,</p>
@@ -124,13 +131,13 @@ class NotificationTemplateService {
           <p>Best regards,<br>The Interview Team</p>
         </div>
       `,
-      inAppTitle: 'Interview Rescheduled',
-      inAppMessage: `Your interview for ${data.jobTitle} has been rescheduled${data.newTime ? ` to ${new Date(data.newTime).toLocaleDateString()}` : ''}.`
-    }),
+			inAppTitle: 'Interview Rescheduled',
+			inAppMessage: `Your interview for ${data.jobTitle} has been rescheduled${data.newTime ? ` to ${new Date(data.newTime).toLocaleDateString()}` : ''}.`,
+		}),
 
-    availability_updated: (data) => ({
-      subject: 'Availability Updated',
-      html: `
+		availability_updated: (data) => ({
+			subject: 'Availability Updated',
+			html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #007AFF;">Availability Updated</h2>
           <p>Hello,</p>
@@ -139,13 +146,13 @@ class NotificationTemplateService {
           <p>Best regards,<br>The Interview Team</p>
         </div>
       `,
-      inAppTitle: 'Availability Updated',
-      inAppMessage: 'Your interview availability has been updated successfully.'
-    }),
+			inAppTitle: 'Availability Updated',
+			inAppMessage: 'Your interview availability has been updated successfully.',
+		}),
 
-    job_posted: (data) => ({
-      subject: `Job Posted Successfully - ${data.jobTitle}`,
-      html: `
+		job_posted: (data) => ({
+			subject: `Job Posted Successfully - ${data.jobTitle}`,
+			html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #34C759;">Job Posted Successfully</h2>
           <p>Hello,</p>
@@ -154,13 +161,13 @@ class NotificationTemplateService {
           <p>Best regards,<br>The Interview Team</p>
         </div>
       `,
-      inAppTitle: 'Job Posted',
-      inAppMessage: `Your job posting for ${data.jobTitle} has been published successfully.`
-    }),
+			inAppTitle: 'Job Posted',
+			inAppMessage: `Your job posting for ${data.jobTitle} has been published successfully.`,
+		}),
 
-    candidate_matched: (data) => ({
-      subject: `New Candidate Match - ${data.jobTitle}`,
-      html: `
+		candidate_matched: (data) => ({
+			subject: `New Candidate Match - ${data.jobTitle}`,
+			html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #007AFF;">New Candidate Match</h2>
           <p>Hello,</p>
@@ -170,13 +177,13 @@ class NotificationTemplateService {
           <p>Best regards,<br>The Interview Team</p>
         </div>
       `,
-      inAppTitle: 'New Candidate Match',
-      inAppMessage: `${data.candidateName} has been matched to your ${data.jobTitle} position.`
-    }),
+			inAppTitle: 'New Candidate Match',
+			inAppMessage: `${data.candidateName} has been matched to your ${data.jobTitle} position.`,
+		}),
 
-    application_received: (data) => ({
-      subject: `New Application - ${data.jobTitle}`,
-      html: `
+		application_received: (data) => ({
+			subject: `New Application - ${data.jobTitle}`,
+			html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #007AFF;">New Application Received</h2>
           <p>Hello,</p>
@@ -186,352 +193,352 @@ class NotificationTemplateService {
           <p>Best regards,<br>The Interview Team</p>
         </div>
       `,
-      inAppTitle: 'New Application',
-      inAppMessage: `${data.candidateName} has applied for your ${data.jobTitle} position.`
-    })
-  };
+			inAppTitle: 'New Application',
+			inAppMessage: `${data.candidateName} has applied for your ${data.jobTitle} position.`,
+		}),
+	}
 
-  getTemplate(type: NotificationType, data: NotificationData): NotificationTemplate {
-    const templateFn = this.templates[type];
-    if (!templateFn) {
-      throw new Error(`No template found for notification type: ${type}`);
-    }
-    return templateFn(data);
-  }
+	getTemplate(type: NotificationType, data: NotificationData): NotificationTemplate {
+		const templateFn = this.templates[type]
+		if (!templateFn) {
+			throw new Error(`No template found for notification type: ${type}`)
+		}
+		return templateFn(data)
+	}
 }
 
 // Main notification service
 export class NotificationService {
-  private emailService: EmailService;
-  private templateService: NotificationTemplateService;
+	private emailService: EmailService
+	private templateService: NotificationTemplateService
 
-  constructor() {
-    this.emailService = new SimpleEmailService();
-    this.templateService = new NotificationTemplateService();
-  }
+	constructor() {
+		this.emailService = new SimpleEmailService()
+		this.templateService = new NotificationTemplateService()
+	}
 
-  // Create and store a notification
-  async createNotification(
-    userId: string,
-    type: NotificationType,
-    data: NotificationData,
-    sendEmail: boolean = true
-  ): Promise<InterviewNotification> {
-    try {
-      const template = this.templateService.getTemplate(type, data);
-      
-      // Generate unique ID
-      const id = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Create notification record
-      const notification: InterviewNotification = {
-        id,
-        userId,
-        type,
-        title: template.inAppTitle,
-        message: template.inAppMessage,
-        data,
-        read: false,
-        sentAt: sendEmail ? new Date() : undefined,
-        createdAt: new Date()
-      };
+	// Create and store a notification
+	async createNotification(
+		userId: string,
+		type: NotificationType,
+		data: NotificationData,
+		sendEmail: boolean = true,
+	): Promise<InterviewNotification> {
+		try {
+			const template = this.templateService.getTemplate(type, data)
 
-      // Store in database
-      await db.insert(interviewNotifications).values({
-        id: notification.id,
-        userId: notification.userId,
-        type: notification.type,
-        title: notification.title,
-        message: notification.message,
-        data: notification.data,
-        read: notification.read,
-        sentAt: notification.sentAt,
-        createdAt: notification.createdAt
-      });
+			// Generate unique ID
+			const id = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-      // Send email if requested
-      if (sendEmail) {
-        await this.sendEmailNotification(userId, template);
-      }
+			// Create notification record
+			const notification: InterviewNotification = {
+				id,
+				userId,
+				type,
+				title: template.inAppTitle,
+				message: template.inAppMessage,
+				data,
+				read: false,
+				sentAt: sendEmail ? new Date() : undefined,
+				createdAt: new Date(),
+			}
 
-      return notification;
-    } catch (error) {
-      console.error('Failed to create notification:', error);
-      throw new Error('Failed to create notification');
-    }
-  }
+			// Store in database
+			await db.insert(interviewNotifications).values({
+				id: notification.id,
+				userId: notification.userId,
+				type: notification.type,
+				title: notification.title,
+				message: notification.message,
+				data: notification.data,
+				read: notification.read,
+				sentAt: notification.sentAt,
+				createdAt: notification.createdAt,
+			})
 
-  // Send email notification
-  private async sendEmailNotification(userId: string, template: NotificationTemplate): Promise<void> {
-    try {
-      // Get user email
-      const userRecord = await db
-        .select({ email: user.email })
-        .from(user)
-        .where(eq(user.id, userId))
-        .limit(1);
+			// Send email if requested
+			if (sendEmail) {
+				await this.sendEmailNotification(userId, template)
+			}
 
-      if (userRecord.length === 0) {
-        throw new Error('User not found');
-      }
+			return notification
+		} catch (error) {
+			console.error('Failed to create notification:', error)
+			throw new Error('Failed to create notification')
+		}
+	}
 
-      const userEmail = userRecord[0].email;
-      
-      // Send email
-      await this.emailService.sendEmail(userEmail, template.subject, template.html);
-    } catch (error) {
-      console.error('Failed to send email notification:', error);
-      // Don't throw error - notification was still created
-    }
-  }
+	// Send email notification
+	private async sendEmailNotification(
+		userId: string,
+		template: NotificationTemplate,
+	): Promise<void> {
+		try {
+			// Get user email
+			const userRecord = await db
+				.select({ email: user.email })
+				.from(user)
+				.where(eq(user.id, userId))
+				.limit(1)
 
-  // Get notifications for a user
-  async getUserNotifications(
-    userId: string,
-    options: {
-      limit?: number;
-      offset?: number;
-      unreadOnly?: boolean;
-      types?: NotificationType[];
-    } = {}
-  ): Promise<{ notifications: InterviewNotification[]; total: number }> {
-    try {
-      const { limit = 50, offset = 0, unreadOnly = false, types } = options;
+			if (userRecord.length === 0) {
+				throw new Error('User not found')
+			}
 
-      let query = db
-        .select()
-        .from(interviewNotifications)
-        .where(eq(interviewNotifications.userId, userId));
+			const userEmail = userRecord[0].email
 
-      // Add filters
-      const conditions = [eq(interviewNotifications.userId, userId)];
-      
-      if (unreadOnly) {
-        conditions.push(eq(interviewNotifications.read, false));
-      }
-      
-      if (types && types.length > 0) {
-        conditions.push(inArray(interviewNotifications.type, types));
-      }
+			// Send email
+			await this.emailService.sendEmail(userEmail, template.subject, template.html)
+		} catch (error) {
+			console.error('Failed to send email notification:', error)
+			// Don't throw error - notification was still created
+		}
+	}
 
-      // Apply conditions
-      if (conditions.length > 1) {
-        query = query.where(and(...conditions));
-      }
+	// Get notifications for a user
+	async getUserNotifications(
+		userId: string,
+		options: {
+			limit?: number
+			offset?: number
+			unreadOnly?: boolean
+			types?: NotificationType[]
+		} = {},
+	): Promise<{ notifications: InterviewNotification[]; total: number }> {
+		try {
+			const { limit = 50, offset = 0, unreadOnly = false, types } = options
 
-      // Get notifications with pagination
-      const notifications = await query
-        .orderBy(desc(interviewNotifications.createdAt))
-        .limit(limit)
-        .offset(offset);
+			let query = db
+				.select()
+				.from(interviewNotifications)
+				.where(eq(interviewNotifications.userId, userId))
 
-      // Get total count
-      const totalQuery = db
-        .select({ count: interviewNotifications.id })
-        .from(interviewNotifications);
-      
-      if (conditions.length > 1) {
-        totalQuery.where(and(...conditions));
-      } else {
-        totalQuery.where(conditions[0]);
-      }
-      
-      const totalResult = await totalQuery;
-      const total = totalResult.length;
+			// Add filters
+			const conditions = [eq(interviewNotifications.userId, userId)]
 
-      return {
-        notifications: notifications.map(n => ({
-          ...n,
-          createdAt: new Date(n.createdAt),
-          sentAt: n.sentAt ? new Date(n.sentAt) : undefined
-        })),
-        total
-      };
-    } catch (error) {
-      console.error('Failed to get user notifications:', error);
-      throw new Error('Failed to retrieve notifications');
-    }
-  }
+			if (unreadOnly) {
+				conditions.push(eq(interviewNotifications.read, false))
+			}
 
-  // Mark notifications as read
-  async markNotificationsRead(userId: string, notificationIds: string[]): Promise<void> {
-    try {
-      await db
-        .update(interviewNotifications)
-        .set({ read: true })
-        .where(
-          and(
-            eq(interviewNotifications.userId, userId),
-            inArray(interviewNotifications.id, notificationIds)
-          )
-        );
-    } catch (error) {
-      console.error('Failed to mark notifications as read:', error);
-      throw new Error('Failed to mark notifications as read');
-    }
-  }
+			if (types && types.length > 0) {
+				conditions.push(inArray(interviewNotifications.type, types))
+			}
 
-  // Get unread notification count
-  async getUnreadCount(userId: string): Promise<number> {
-    try {
-      const result = await db
-        .select({ count: interviewNotifications.id })
-        .from(interviewNotifications)
-        .where(
-          and(
-            eq(interviewNotifications.userId, userId),
-            eq(interviewNotifications.read, false)
-          )
-        );
+			// Apply conditions
+			if (conditions.length > 1) {
+				query = query.where(and(...conditions))
+			}
 
-      return result.length;
-    } catch (error) {
-      console.error('Failed to get unread count:', error);
-      return 0;
-    }
-  }
+			// Get notifications with pagination
+			const notifications = await query
+				.orderBy(desc(interviewNotifications.createdAt))
+				.limit(limit)
+				.offset(offset)
 
-  // Helper methods for specific notification types
-  async notifyInterviewScheduled(
-    candidateId: string,
-    recruiterId: string,
-    interview: InterviewSession,
-    jobPosting: JobPosting,
-    recruiterProfile: RecruiterProfile
-  ): Promise<void> {
-    const data: NotificationData = {
-      interviewId: interview.id,
-      jobPostingId: interview.jobPostingId,
-      candidateName: '', // Will be filled by caller if needed
-      recruiterName: recruiterProfile.organizationName,
-      jobTitle: jobPosting.title,
-      scheduledTime: interview.scheduledStart,
-      meetingLink: interview.meetingLink
-    };
+			// Get total count
+			const totalQuery = db
+				.select({ count: interviewNotifications.id })
+				.from(interviewNotifications)
 
-    // Notify candidate
-    await this.createNotification(candidateId, 'interview_scheduled', data);
+			if (conditions.length > 1) {
+				totalQuery.where(and(...conditions))
+			} else {
+				totalQuery.where(conditions[0])
+			}
 
-    // Notify recruiter
-    await this.createNotification(recruiterId, 'interview_scheduled', {
-      ...data,
-      recruiterName: undefined // Don't show recruiter their own name
-    });
-  }
+			const totalResult = await totalQuery
+			const total = totalResult.length
 
-  async notifyInterviewConfirmed(
-    candidateId: string,
-    recruiterId: string,
-    interview: InterviewSession,
-    jobPosting: JobPosting,
-    recruiterProfile: RecruiterProfile
-  ): Promise<void> {
-    const data: NotificationData = {
-      interviewId: interview.id,
-      jobPostingId: interview.jobPostingId,
-      recruiterName: recruiterProfile.organizationName,
-      jobTitle: jobPosting.title,
-      scheduledTime: interview.scheduledStart,
-      meetingLink: interview.meetingLink
-    };
+			return {
+				notifications: notifications.map((n) => ({
+					...n,
+					createdAt: new Date(n.createdAt),
+					sentAt: n.sentAt ? new Date(n.sentAt) : undefined,
+				})),
+				total,
+			}
+		} catch (error) {
+			console.error('Failed to get user notifications:', error)
+			throw new Error('Failed to retrieve notifications')
+		}
+	}
 
-    // Notify both parties
-    await this.createNotification(candidateId, 'interview_confirmed', data);
-    await this.createNotification(recruiterId, 'interview_confirmed', {
-      ...data,
-      recruiterName: undefined
-    });
-  }
+	// Mark notifications as read
+	async markNotificationsRead(userId: string, notificationIds: string[]): Promise<void> {
+		try {
+			await db
+				.update(interviewNotifications)
+				.set({ read: true })
+				.where(
+					and(
+						eq(interviewNotifications.userId, userId),
+						inArray(interviewNotifications.id, notificationIds),
+					),
+				)
+		} catch (error) {
+			console.error('Failed to mark notifications as read:', error)
+			throw new Error('Failed to mark notifications as read')
+		}
+	}
 
-  async notifyInterviewCancelled(
-    candidateId: string,
-    recruiterId: string,
-    interview: InterviewSession,
-    jobPosting: JobPosting,
-    reason?: string
-  ): Promise<void> {
-    const data: NotificationData = {
-      interviewId: interview.id,
-      jobPostingId: interview.jobPostingId,
-      jobTitle: jobPosting.title,
-      scheduledTime: interview.scheduledStart,
-      reason
-    };
+	// Get unread notification count
+	async getUnreadCount(userId: string): Promise<number> {
+		try {
+			const result = await db
+				.select({ count: interviewNotifications.id })
+				.from(interviewNotifications)
+				.where(
+					and(eq(interviewNotifications.userId, userId), eq(interviewNotifications.read, false)),
+				)
 
-    // Notify both parties
-    await this.createNotification(candidateId, 'interview_cancelled', data);
-    await this.createNotification(recruiterId, 'interview_cancelled', data);
-  }
+			return result.length
+		} catch (error) {
+			console.error('Failed to get unread count:', error)
+			return 0
+		}
+	}
 
-  async notifyInterviewRescheduled(
-    candidateId: string,
-    recruiterId: string,
-    interview: InterviewSession,
-    jobPosting: JobPosting,
-    recruiterProfile: RecruiterProfile,
-    previousTime: Date,
-    reason?: string
-  ): Promise<void> {
-    const data: NotificationData = {
-      interviewId: interview.id,
-      jobPostingId: interview.jobPostingId,
-      recruiterName: recruiterProfile.organizationName,
-      jobTitle: jobPosting.title,
-      previousTime,
-      newTime: interview.scheduledStart,
-      meetingLink: interview.meetingLink,
-      reason
-    };
+	// Helper methods for specific notification types
+	async notifyInterviewScheduled(
+		candidateId: string,
+		recruiterId: string,
+		interview: InterviewSession,
+		jobPosting: JobPosting,
+		recruiterProfile: RecruiterProfile,
+	): Promise<void> {
+		const data: NotificationData = {
+			interviewId: interview.id,
+			jobPostingId: interview.jobPostingId,
+			candidateName: '', // Will be filled by caller if needed
+			recruiterName: recruiterProfile.organizationName,
+			jobTitle: jobPosting.title,
+			scheduledTime: interview.scheduledStart,
+			meetingLink: interview.meetingLink,
+		}
 
-    // Notify both parties
-    await this.createNotification(candidateId, 'interview_rescheduled', data);
-    await this.createNotification(recruiterId, 'interview_rescheduled', {
-      ...data,
-      recruiterName: undefined
-    });
-  }
+		// Notify candidate
+		await this.createNotification(candidateId, 'interview_scheduled', data)
 
-  async notifyAvailabilityUpdated(candidateId: string): Promise<void> {
-    await this.createNotification(candidateId, 'availability_updated', {}, false);
-  }
+		// Notify recruiter
+		await this.createNotification(recruiterId, 'interview_scheduled', {
+			...data,
+			recruiterName: undefined, // Don't show recruiter their own name
+		})
+	}
 
-  async notifyJobPosted(recruiterId: string, jobPosting: JobPosting): Promise<void> {
-    const data: NotificationData = {
-      jobPostingId: jobPosting.id,
-      jobTitle: jobPosting.title
-    };
+	async notifyInterviewConfirmed(
+		candidateId: string,
+		recruiterId: string,
+		interview: InterviewSession,
+		jobPosting: JobPosting,
+		recruiterProfile: RecruiterProfile,
+	): Promise<void> {
+		const data: NotificationData = {
+			interviewId: interview.id,
+			jobPostingId: interview.jobPostingId,
+			recruiterName: recruiterProfile.organizationName,
+			jobTitle: jobPosting.title,
+			scheduledTime: interview.scheduledStart,
+			meetingLink: interview.meetingLink,
+		}
 
-    await this.createNotification(recruiterId, 'job_posted', data, false);
-  }
+		// Notify both parties
+		await this.createNotification(candidateId, 'interview_confirmed', data)
+		await this.createNotification(recruiterId, 'interview_confirmed', {
+			...data,
+			recruiterName: undefined,
+		})
+	}
 
-  async notifyCandidateMatched(
-    recruiterId: string,
-    candidateName: string,
-    jobPosting: JobPosting
-  ): Promise<void> {
-    const data: NotificationData = {
-      jobPostingId: jobPosting.id,
-      candidateName,
-      jobTitle: jobPosting.title
-    };
+	async notifyInterviewCancelled(
+		candidateId: string,
+		recruiterId: string,
+		interview: InterviewSession,
+		jobPosting: JobPosting,
+		reason?: string,
+	): Promise<void> {
+		const data: NotificationData = {
+			interviewId: interview.id,
+			jobPostingId: interview.jobPostingId,
+			jobTitle: jobPosting.title,
+			scheduledTime: interview.scheduledStart,
+			reason,
+		}
 
-    await this.createNotification(recruiterId, 'candidate_matched', data);
-  }
+		// Notify both parties
+		await this.createNotification(candidateId, 'interview_cancelled', data)
+		await this.createNotification(recruiterId, 'interview_cancelled', data)
+	}
 
-  async notifyApplicationReceived(
-    recruiterId: string,
-    candidateName: string,
-    jobPosting: JobPosting
-  ): Promise<void> {
-    const data: NotificationData = {
-      jobPostingId: jobPosting.id,
-      candidateName,
-      jobTitle: jobPosting.title
-    };
+	async notifyInterviewRescheduled(
+		candidateId: string,
+		recruiterId: string,
+		interview: InterviewSession,
+		jobPosting: JobPosting,
+		recruiterProfile: RecruiterProfile,
+		previousTime: Date,
+		reason?: string,
+	): Promise<void> {
+		const data: NotificationData = {
+			interviewId: interview.id,
+			jobPostingId: interview.jobPostingId,
+			recruiterName: recruiterProfile.organizationName,
+			jobTitle: jobPosting.title,
+			previousTime,
+			newTime: interview.scheduledStart,
+			meetingLink: interview.meetingLink,
+			reason,
+		}
 
-    await this.createNotification(recruiterId, 'application_received', data);
-  }
+		// Notify both parties
+		await this.createNotification(candidateId, 'interview_rescheduled', data)
+		await this.createNotification(recruiterId, 'interview_rescheduled', {
+			...data,
+			recruiterName: undefined,
+		})
+	}
+
+	async notifyAvailabilityUpdated(candidateId: string): Promise<void> {
+		await this.createNotification(candidateId, 'availability_updated', {}, false)
+	}
+
+	async notifyJobPosted(recruiterId: string, jobPosting: JobPosting): Promise<void> {
+		const data: NotificationData = {
+			jobPostingId: jobPosting.id,
+			jobTitle: jobPosting.title,
+		}
+
+		await this.createNotification(recruiterId, 'job_posted', data, false)
+	}
+
+	async notifyCandidateMatched(
+		recruiterId: string,
+		candidateName: string,
+		jobPosting: JobPosting,
+	): Promise<void> {
+		const data: NotificationData = {
+			jobPostingId: jobPosting.id,
+			candidateName,
+			jobTitle: jobPosting.title,
+		}
+
+		await this.createNotification(recruiterId, 'candidate_matched', data)
+	}
+
+	async notifyApplicationReceived(
+		recruiterId: string,
+		candidateName: string,
+		jobPosting: JobPosting,
+	): Promise<void> {
+		const data: NotificationData = {
+			jobPostingId: jobPosting.id,
+			candidateName,
+			jobTitle: jobPosting.title,
+		}
+
+		await this.createNotification(recruiterId, 'application_received', data)
+	}
 }
 
 // Export singleton instance
-export const notificationService = new NotificationService();
+export const notificationService = new NotificationService()

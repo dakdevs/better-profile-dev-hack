@@ -1,447 +1,450 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock environment variables
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
-process.env.BETTER_AUTH_SECRET = 'test-secret';
-process.env.BETTER_AUTH_URL = 'http://localhost:3000';
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+process.env.BETTER_AUTH_SECRET = 'test-secret'
+process.env.BETTER_AUTH_URL = 'http://localhost:3000'
 
 describe('API Endpoints Integration Tests', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+	beforeEach(() => {
+		vi.clearAllMocks()
+	})
 
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
+	afterEach(() => {
+		vi.resetAllMocks()
+	})
 
-  describe('Recruiter Profile API', () => {
-    it('should validate recruiter profile creation flow', async () => {
-      // Test data validation
-      const validProfileData = {
-        organizationName: 'Test Company',
-        recruitingFor: 'Software Engineers',
-        contactEmail: 'recruiter@test.com',
-        phoneNumber: '+1234567890',
-        timezone: 'America/New_York'
-      };
+	describe('Recruiter Profile API', () => {
+		it('should validate recruiter profile creation flow', async () => {
+			// Test data validation
+			const validProfileData = {
+				organizationName: 'Test Company',
+				recruitingFor: 'Software Engineers',
+				contactEmail: 'recruiter@test.com',
+				phoneNumber: '+1234567890',
+				timezone: 'America/New_York',
+			}
 
-      // Validate required fields
-      expect(validProfileData.organizationName).toBeTruthy();
-      expect(validProfileData.recruitingFor).toBeTruthy();
-      expect(validProfileData.contactEmail).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-      expect(validProfileData.timezone).toBeTruthy();
+			// Validate required fields
+			expect(validProfileData.organizationName).toBeTruthy()
+			expect(validProfileData.recruitingFor).toBeTruthy()
+			expect(validProfileData.contactEmail).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+			expect(validProfileData.timezone).toBeTruthy()
 
-      // Test invalid data scenarios
-      const invalidData = {
-        organizationName: '', // Empty required field
-        recruitingFor: 'Software Engineers'
-      };
+			// Test invalid data scenarios
+			const invalidData = {
+				organizationName: '', // Empty required field
+				recruitingFor: 'Software Engineers',
+			}
 
-      expect(invalidData.organizationName).toBeFalsy();
-    });
+			expect(invalidData.organizationName).toBeFalsy()
+		})
 
-    it('should validate profile update scenarios', async () => {
-      const updateData = {
-        organizationName: 'Updated Company',
-        contactEmail: 'updated@test.com'
-      };
+		it('should validate profile update scenarios', async () => {
+			const updateData = {
+				organizationName: 'Updated Company',
+				contactEmail: 'updated@test.com',
+			}
 
-      // Validate update data
-      expect(updateData.organizationName).toBeTruthy();
-      expect(updateData.contactEmail).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-    });
-  });
+			// Validate update data
+			expect(updateData.organizationName).toBeTruthy()
+			expect(updateData.contactEmail).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+		})
+	})
 
-  describe('Job Posting API', () => {
-    it('should validate job posting creation flow', async () => {
-      const validJobData = {
-        title: 'Senior Software Engineer',
-        description: 'We are looking for a senior software engineer with experience in React and Node.js...',
-        location: 'Remote',
-        remoteAllowed: true,
-        employmentType: 'full-time',
-        salaryMin: 80000,
-        salaryMax: 120000
-      };
+	describe('Job Posting API', () => {
+		it('should validate job posting creation flow', async () => {
+			const validJobData = {
+				title: 'Senior Software Engineer',
+				description:
+					'We are looking for a senior software engineer with experience in React and Node.js...',
+				location: 'Remote',
+				remoteAllowed: true,
+				employmentType: 'full-time',
+				salaryMin: 80000,
+				salaryMax: 120000,
+			}
 
-      // Validate required fields
-      expect(validJobData.title).toBeTruthy();
-      expect(validJobData.description).toBeTruthy();
-      expect(validJobData.description.length).toBeGreaterThan(10);
-      expect(validJobData.salaryMin).toBeLessThan(validJobData.salaryMax);
+			// Validate required fields
+			expect(validJobData.title).toBeTruthy()
+			expect(validJobData.description).toBeTruthy()
+			expect(validJobData.description.length).toBeGreaterThan(10)
+			expect(validJobData.salaryMin).toBeLessThan(validJobData.salaryMax)
 
-      // Test AI analysis expectations
-      const expectedSkills = ['React', 'Node.js'];
-      const jobDescription = validJobData.description.toLowerCase();
-      
-      expectedSkills.forEach(skill => {
-        expect(jobDescription).toContain(skill.toLowerCase());
-      });
-    });
+			// Test AI analysis expectations
+			const expectedSkills = ['React', 'Node.js']
+			const jobDescription = validJobData.description.toLowerCase()
 
-    it('should validate job posting filters and search', async () => {
-      const filterCriteria = {
-        status: 'active',
-        experienceLevel: 'senior',
-        remoteAllowed: true,
-        salaryMin: 80000
-      };
+			expectedSkills.forEach((skill) => {
+				expect(jobDescription).toContain(skill.toLowerCase())
+			})
+		})
 
-      // Validate filter criteria
-      expect(['active', 'paused', 'closed']).toContain(filterCriteria.status);
-      expect(['entry', 'mid', 'senior', 'executive']).toContain(filterCriteria.experienceLevel);
-      expect(typeof filterCriteria.remoteAllowed).toBe('boolean');
-      expect(filterCriteria.salaryMin).toBeGreaterThan(0);
-    });
-  });
+		it('should validate job posting filters and search', async () => {
+			const filterCriteria = {
+				status: 'active',
+				experienceLevel: 'senior',
+				remoteAllowed: true,
+				salaryMin: 80000,
+			}
 
-  describe('Availability Management API', () => {
-    it('should validate availability slot creation', async () => {
-      const validAvailabilityData = {
-        startTime: '2024-12-01T10:00:00Z',
-        endTime: '2024-12-01T12:00:00Z',
-        timezone: 'America/New_York',
-        isRecurring: false
-      };
+			// Validate filter criteria
+			expect(['active', 'paused', 'closed']).toContain(filterCriteria.status)
+			expect(['entry', 'mid', 'senior', 'executive']).toContain(filterCriteria.experienceLevel)
+			expect(typeof filterCriteria.remoteAllowed).toBe('boolean')
+			expect(filterCriteria.salaryMin).toBeGreaterThan(0)
+		})
+	})
 
-      const startTime = new Date(validAvailabilityData.startTime);
-      const endTime = new Date(validAvailabilityData.endTime);
+	describe('Availability Management API', () => {
+		it('should validate availability slot creation', async () => {
+			const validAvailabilityData = {
+				startTime: '2024-12-01T10:00:00Z',
+				endTime: '2024-12-01T12:00:00Z',
+				timezone: 'America/New_York',
+				isRecurring: false,
+			}
 
-      // Validate time range
-      expect(endTime.getTime()).toBeGreaterThan(startTime.getTime());
-      expect(startTime.getTime()).toBeGreaterThan(new Date('2024-01-01').getTime()); // Valid future date
-      
-      // Validate timezone
-      expect(validAvailabilityData.timezone).toBeTruthy();
-      expect(typeof validAvailabilityData.isRecurring).toBe('boolean');
-    });
+			const startTime = new Date(validAvailabilityData.startTime)
+			const endTime = new Date(validAvailabilityData.endTime)
 
-    it('should validate recurring availability patterns', async () => {
-      const recurringData = {
-        startTime: '2024-12-01T10:00:00Z',
-        endTime: '2024-12-01T12:00:00Z',
-        timezone: 'America/New_York',
-        isRecurring: true,
-        recurrencePattern: {
-          type: 'weekly',
-          interval: 1,
-          daysOfWeek: [1, 3, 5], // Monday, Wednesday, Friday
-          endDate: '2024-12-31T23:59:59Z'
-        }
-      };
+			// Validate time range
+			expect(endTime.getTime()).toBeGreaterThan(startTime.getTime())
+			expect(startTime.getTime()).toBeGreaterThan(new Date('2024-01-01').getTime()) // Valid future date
 
-      // Validate recurrence pattern
-      expect(['daily', 'weekly', 'monthly']).toContain(recurringData.recurrencePattern.type);
-      expect(recurringData.recurrencePattern.interval).toBeGreaterThan(0);
-      expect(recurringData.recurrencePattern.daysOfWeek).toHaveLength(3);
-      expect(recurringData.recurrencePattern.daysOfWeek.every(day => day >= 0 && day <= 6)).toBe(true);
-    });
+			// Validate timezone
+			expect(validAvailabilityData.timezone).toBeTruthy()
+			expect(typeof validAvailabilityData.isRecurring).toBe('boolean')
+		})
 
-    it('should validate conflict detection logic', async () => {
-      const existingSlot = {
-        startTime: new Date('2024-12-01T10:00:00Z'),
-        endTime: new Date('2024-12-01T12:00:00Z')
-      };
+		it('should validate recurring availability patterns', async () => {
+			const recurringData = {
+				startTime: '2024-12-01T10:00:00Z',
+				endTime: '2024-12-01T12:00:00Z',
+				timezone: 'America/New_York',
+				isRecurring: true,
+				recurrencePattern: {
+					type: 'weekly',
+					interval: 1,
+					daysOfWeek: [1, 3, 5], // Monday, Wednesday, Friday
+					endDate: '2024-12-31T23:59:59Z',
+				},
+			}
 
-      const newSlot = {
-        startTime: new Date('2024-12-01T11:00:00Z'),
-        endTime: new Date('2024-12-01T13:00:00Z')
-      };
+			// Validate recurrence pattern
+			expect(['daily', 'weekly', 'monthly']).toContain(recurringData.recurrencePattern.type)
+			expect(recurringData.recurrencePattern.interval).toBeGreaterThan(0)
+			expect(recurringData.recurrencePattern.daysOfWeek).toHaveLength(3)
+			expect(recurringData.recurrencePattern.daysOfWeek.every((day) => day >= 0 && day <= 6)).toBe(
+				true,
+			)
+		})
 
-      // Check for overlap
-      const hasOverlap = (
-        newSlot.startTime < existingSlot.endTime &&
-        newSlot.endTime > existingSlot.startTime
-      );
+		it('should validate conflict detection logic', async () => {
+			const existingSlot = {
+				startTime: new Date('2024-12-01T10:00:00Z'),
+				endTime: new Date('2024-12-01T12:00:00Z'),
+			}
 
-      expect(hasOverlap).toBe(true);
-    });
-  });
+			const newSlot = {
+				startTime: new Date('2024-12-01T11:00:00Z'),
+				endTime: new Date('2024-12-01T13:00:00Z'),
+			}
 
-  describe('Interview Scheduling API', () => {
-    it('should validate interview scheduling request', async () => {
-      const validScheduleData = {
-        jobPostingId: 'test-job-id',
-        candidateId: 'test-candidate-id',
-        preferredTimes: [
-          {
-            start: '2024-12-01T10:00:00Z',
-            end: '2024-12-01T11:00:00Z',
-            timezone: 'America/New_York'
-          }
-        ],
-        interviewType: 'video',
-        duration: 60,
-        notes: 'Technical interview'
-      };
+			// Check for overlap
+			const hasOverlap =
+				newSlot.startTime < existingSlot.endTime && newSlot.endTime > existingSlot.startTime
 
-      // Validate required fields
-      expect(validScheduleData.jobPostingId).toBeTruthy();
-      expect(validScheduleData.candidateId).toBeTruthy();
-      expect(validScheduleData.preferredTimes).toHaveLength(1);
-      expect(['video', 'phone', 'in-person']).toContain(validScheduleData.interviewType);
-      expect(validScheduleData.duration).toBeGreaterThan(0);
+			expect(hasOverlap).toBe(true)
+		})
+	})
 
-      // Validate time slots
-      const timeSlot = validScheduleData.preferredTimes[0];
-      const startTime = new Date(timeSlot.start);
-      const endTime = new Date(timeSlot.end);
-      
-      expect(endTime.getTime()).toBeGreaterThan(startTime.getTime());
-      expect(timeSlot.timezone).toBeTruthy();
-    });
+	describe('Interview Scheduling API', () => {
+		it('should validate interview scheduling request', async () => {
+			const validScheduleData = {
+				jobPostingId: 'test-job-id',
+				candidateId: 'test-candidate-id',
+				preferredTimes: [
+					{
+						start: '2024-12-01T10:00:00Z',
+						end: '2024-12-01T11:00:00Z',
+						timezone: 'America/New_York',
+					},
+				],
+				interviewType: 'video',
+				duration: 60,
+				notes: 'Technical interview',
+			}
 
-    it('should validate interview confirmation flow', async () => {
-      const confirmData = {
-        confirmed: true,
-        notes: 'Looking forward to the interview'
-      };
+			// Validate required fields
+			expect(validScheduleData.jobPostingId).toBeTruthy()
+			expect(validScheduleData.candidateId).toBeTruthy()
+			expect(validScheduleData.preferredTimes).toHaveLength(1)
+			expect(['video', 'phone', 'in-person']).toContain(validScheduleData.interviewType)
+			expect(validScheduleData.duration).toBeGreaterThan(0)
 
-      expect(typeof confirmData.confirmed).toBe('boolean');
-      expect(confirmData.notes).toBeTruthy();
+			// Validate time slots
+			const timeSlot = validScheduleData.preferredTimes[0]
+			const startTime = new Date(timeSlot.start)
+			const endTime = new Date(timeSlot.end)
 
-      // Test decline scenario
-      const declineData = {
-        confirmed: false,
-        notes: 'Schedule conflict'
-      };
+			expect(endTime.getTime()).toBeGreaterThan(startTime.getTime())
+			expect(timeSlot.timezone).toBeTruthy()
+		})
 
-      expect(declineData.confirmed).toBe(false);
-      expect(declineData.notes).toBeTruthy();
-    });
+		it('should validate interview confirmation flow', async () => {
+			const confirmData = {
+				confirmed: true,
+				notes: 'Looking forward to the interview',
+			}
 
-    it('should validate mutual availability logic', async () => {
-      const candidateAvailability = [
-        {
-          startTime: new Date('2024-12-01T10:00:00Z'),
-          endTime: new Date('2024-12-01T12:00:00Z')
-        }
-      ];
+			expect(typeof confirmData.confirmed).toBe('boolean')
+			expect(confirmData.notes).toBeTruthy()
 
-      const recruiterAvailability = [
-        {
-          startTime: new Date('2024-12-01T11:00:00Z'),
-          endTime: new Date('2024-12-01T13:00:00Z')
-        }
-      ];
+			// Test decline scenario
+			const declineData = {
+				confirmed: false,
+				notes: 'Schedule conflict',
+			}
 
-      // Find overlap
-      const findOverlap = (slot1: any, slot2: any) => {
-        const overlapStart = new Date(Math.max(slot1.startTime.getTime(), slot2.startTime.getTime()));
-        const overlapEnd = new Date(Math.min(slot1.endTime.getTime(), slot2.endTime.getTime()));
-        
-        return overlapStart < overlapEnd ? { start: overlapStart, end: overlapEnd } : null;
-      };
+			expect(declineData.confirmed).toBe(false)
+			expect(declineData.notes).toBeTruthy()
+		})
 
-      const overlap = findOverlap(candidateAvailability[0], recruiterAvailability[0]);
-      expect(overlap).toBeTruthy();
-      expect(overlap?.start).toEqual(new Date('2024-12-01T11:00:00Z'));
-      expect(overlap?.end).toEqual(new Date('2024-12-01T12:00:00Z'));
-    });
-  });
+		it('should validate mutual availability logic', async () => {
+			const candidateAvailability = [
+				{
+					startTime: new Date('2024-12-01T10:00:00Z'),
+					endTime: new Date('2024-12-01T12:00:00Z'),
+				},
+			]
 
-  describe('Candidate Matching API', () => {
-    it('should validate candidate matching criteria', async () => {
-      const jobRequirements = {
-        requiredSkills: ['JavaScript', 'React', 'Node.js'],
-        preferredSkills: ['TypeScript', 'Next.js'],
-        experienceLevel: 'senior',
-        minMatchScore: 0.7
-      };
+			const recruiterAvailability = [
+				{
+					startTime: new Date('2024-12-01T11:00:00Z'),
+					endTime: new Date('2024-12-01T13:00:00Z'),
+				},
+			]
 
-      const candidateSkills = [
-        { skillName: 'JavaScript', proficiencyScore: 85 },
-        { skillName: 'React', proficiencyScore: 90 },
-        { skillName: 'TypeScript', proficiencyScore: 75 }
-      ];
+			// Find overlap
+			const findOverlap = (slot1: any, slot2: any) => {
+				const overlapStart = new Date(
+					Math.max(slot1.startTime.getTime(), slot2.startTime.getTime()),
+				)
+				const overlapEnd = new Date(Math.min(slot1.endTime.getTime(), slot2.endTime.getTime()))
 
-      // Calculate match score
-      const requiredMatches = jobRequirements.requiredSkills.filter(skill =>
-        candidateSkills.some(candidateSkill => candidateSkill.skillName === skill)
-      );
+				return overlapStart < overlapEnd ? { start: overlapStart, end: overlapEnd } : null
+			}
 
-      const preferredMatches = jobRequirements.preferredSkills.filter(skill =>
-        candidateSkills.some(candidateSkill => candidateSkill.skillName === skill)
-      );
+			const overlap = findOverlap(candidateAvailability[0], recruiterAvailability[0])
+			expect(overlap).toBeTruthy()
+			expect(overlap?.start).toEqual(new Date('2024-12-01T11:00:00Z'))
+			expect(overlap?.end).toEqual(new Date('2024-12-01T12:00:00Z'))
+		})
+	})
 
-      const requiredScore = requiredMatches.length / jobRequirements.requiredSkills.length;
-      const preferredScore = preferredMatches.length / jobRequirements.preferredSkills.length;
-      const matchScore = (requiredScore * 0.7) + (preferredScore * 0.3);
+	describe('Candidate Matching API', () => {
+		it('should validate candidate matching criteria', async () => {
+			const jobRequirements = {
+				requiredSkills: ['JavaScript', 'React', 'Node.js'],
+				preferredSkills: ['TypeScript', 'Next.js'],
+				experienceLevel: 'senior',
+				minMatchScore: 0.7,
+			}
 
-      expect(requiredMatches).toHaveLength(2); // JavaScript, React
-      expect(preferredMatches).toHaveLength(1); // TypeScript
-      expect(matchScore).toBeCloseTo(0.617, 2); // Approximately 61.7%
-    });
+			const candidateSkills = [
+				{ skillName: 'JavaScript', proficiencyScore: 85 },
+				{ skillName: 'React', proficiencyScore: 90 },
+				{ skillName: 'TypeScript', proficiencyScore: 75 },
+			]
 
-    it('should validate candidate filtering options', async () => {
-      const filterOptions = {
-        minMatchScore: 0.8,
-        requiredSkills: ['JavaScript', 'React'],
-        hasAvailability: true,
-        experienceLevel: 'senior',
-        sortBy: 'matchScore',
-        sortOrder: 'desc',
-        page: 1,
-        limit: 10
-      };
+			// Calculate match score
+			const requiredMatches = jobRequirements.requiredSkills.filter((skill) =>
+				candidateSkills.some((candidateSkill) => candidateSkill.skillName === skill),
+			)
 
-      // Validate filter options
-      expect(filterOptions.minMatchScore).toBeGreaterThanOrEqual(0);
-      expect(filterOptions.minMatchScore).toBeLessThanOrEqual(1);
-      expect(filterOptions.requiredSkills).toBeInstanceOf(Array);
-      expect(typeof filterOptions.hasAvailability).toBe('boolean');
-      expect(['entry', 'mid', 'senior', 'executive']).toContain(filterOptions.experienceLevel);
-      expect(['matchScore', 'name', 'experience']).toContain(filterOptions.sortBy);
-      expect(['asc', 'desc']).toContain(filterOptions.sortOrder);
-      expect(filterOptions.page).toBeGreaterThan(0);
-      expect(filterOptions.limit).toBeGreaterThan(0);
-    });
-  });
+			const preferredMatches = jobRequirements.preferredSkills.filter((skill) =>
+				candidateSkills.some((candidateSkill) => candidateSkill.skillName === skill),
+			)
 
-  describe('Notification System API', () => {
-    it('should validate notification creation', async () => {
-      const validNotificationData = {
-        type: 'interview_scheduled',
-        title: 'Interview Scheduled',
-        message: 'Your interview has been scheduled',
-        data: {
-          interviewId: 'test-interview-id',
-          jobTitle: 'Senior Software Engineer'
-        }
-      };
+			const requiredScore = requiredMatches.length / jobRequirements.requiredSkills.length
+			const preferredScore = preferredMatches.length / jobRequirements.preferredSkills.length
+			const matchScore = requiredScore * 0.7 + preferredScore * 0.3
 
-      // Validate notification types
-      const validTypes = [
-        'interview_scheduled',
-        'interview_confirmed',
-        'interview_cancelled',
-        'job_match_found',
-        'availability_updated',
-        'system_update'
-      ];
+			expect(requiredMatches).toHaveLength(2) // JavaScript, React
+			expect(preferredMatches).toHaveLength(1) // TypeScript
+			expect(matchScore).toBeCloseTo(0.617, 2) // Approximately 61.7%
+		})
 
-      expect(validTypes).toContain(validNotificationData.type);
-      expect(validNotificationData.title).toBeTruthy();
-      expect(validNotificationData.message).toBeTruthy();
-      expect(validNotificationData.data).toBeInstanceOf(Object);
-    });
+		it('should validate candidate filtering options', async () => {
+			const filterOptions = {
+				minMatchScore: 0.8,
+				requiredSkills: ['JavaScript', 'React'],
+				hasAvailability: true,
+				experienceLevel: 'senior',
+				sortBy: 'matchScore',
+				sortOrder: 'desc',
+				page: 1,
+				limit: 10,
+			}
 
-    it('should validate notification preferences', async () => {
-      const validPreferences = {
-        emailNotifications: true,
-        interviewReminders: true,
-        jobMatchAlerts: false,
-        systemUpdates: false
-      };
+			// Validate filter options
+			expect(filterOptions.minMatchScore).toBeGreaterThanOrEqual(0)
+			expect(filterOptions.minMatchScore).toBeLessThanOrEqual(1)
+			expect(filterOptions.requiredSkills).toBeInstanceOf(Array)
+			expect(typeof filterOptions.hasAvailability).toBe('boolean')
+			expect(['entry', 'mid', 'senior', 'executive']).toContain(filterOptions.experienceLevel)
+			expect(['matchScore', 'name', 'experience']).toContain(filterOptions.sortBy)
+			expect(['asc', 'desc']).toContain(filterOptions.sortOrder)
+			expect(filterOptions.page).toBeGreaterThan(0)
+			expect(filterOptions.limit).toBeGreaterThan(0)
+		})
+	})
 
-      // Validate preference types
-      Object.values(validPreferences).forEach(value => {
-        expect(typeof value).toBe('boolean');
-      });
+	describe('Notification System API', () => {
+		it('should validate notification creation', async () => {
+			const validNotificationData = {
+				type: 'interview_scheduled',
+				title: 'Interview Scheduled',
+				message: 'Your interview has been scheduled',
+				data: {
+					interviewId: 'test-interview-id',
+					jobTitle: 'Senior Software Engineer',
+				},
+			}
 
-      // Test preference update
-      const updateData = {
-        emailNotifications: false,
-        jobMatchAlerts: true
-      };
+			// Validate notification types
+			const validTypes = [
+				'interview_scheduled',
+				'interview_confirmed',
+				'interview_cancelled',
+				'job_match_found',
+				'availability_updated',
+				'system_update',
+			]
 
-      Object.values(updateData).forEach(value => {
-        expect(typeof value).toBe('boolean');
-      });
-    });
+			expect(validTypes).toContain(validNotificationData.type)
+			expect(validNotificationData.title).toBeTruthy()
+			expect(validNotificationData.message).toBeTruthy()
+			expect(validNotificationData.data).toBeInstanceOf(Object)
+		})
 
-    it('should validate notification filtering and pagination', async () => {
-      const filterOptions = {
-        unreadOnly: true,
-        type: 'interview_scheduled',
-        page: 1,
-        limit: 20
-      };
+		it('should validate notification preferences', async () => {
+			const validPreferences = {
+				emailNotifications: true,
+				interviewReminders: true,
+				jobMatchAlerts: false,
+				systemUpdates: false,
+			}
 
-      expect(typeof filterOptions.unreadOnly).toBe('boolean');
-      expect(filterOptions.type).toBeTruthy();
-      expect(filterOptions.page).toBeGreaterThan(0);
-      expect(filterOptions.limit).toBeGreaterThan(0);
-      expect(filterOptions.limit).toBeLessThanOrEqual(100); // Reasonable limit
-    });
-  });
+			// Validate preference types
+			Object.values(validPreferences).forEach((value) => {
+				expect(typeof value).toBe('boolean')
+			})
 
-  describe('Data Validation and Error Handling', () => {
-    it('should validate common data types', async () => {
-      // Email validation
-      const validEmail = 'test@example.com';
-      const invalidEmail = 'invalid-email';
-      
-      expect(validEmail).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-      expect(invalidEmail).not.toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+			// Test preference update
+			const updateData = {
+				emailNotifications: false,
+				jobMatchAlerts: true,
+			}
 
-      // Phone number validation
-      const validPhone = '+1234567890';
-      const invalidPhone = '123';
-      
-      expect(validPhone).toMatch(/^\+\d{10,15}$/);
-      expect(invalidPhone).not.toMatch(/^\+\d{10,15}$/);
+			Object.values(updateData).forEach((value) => {
+				expect(typeof value).toBe('boolean')
+			})
+		})
 
-      // Date validation
-      const validDate = '2024-12-01T10:00:00Z';
-      const invalidDate = 'invalid-date';
-      
-      expect(new Date(validDate).getTime()).not.toBeNaN();
-      expect(new Date(invalidDate).getTime()).toBeNaN();
+		it('should validate notification filtering and pagination', async () => {
+			const filterOptions = {
+				unreadOnly: true,
+				type: 'interview_scheduled',
+				page: 1,
+				limit: 20,
+			}
 
-      // UUID validation (simplified)
-      const validId = 'test-id-123';
-      const invalidId = '';
-      
-      expect(validId).toBeTruthy();
-      expect(invalidId).toBeFalsy();
-    });
+			expect(typeof filterOptions.unreadOnly).toBe('boolean')
+			expect(filterOptions.type).toBeTruthy()
+			expect(filterOptions.page).toBeGreaterThan(0)
+			expect(filterOptions.limit).toBeGreaterThan(0)
+			expect(filterOptions.limit).toBeLessThanOrEqual(100) // Reasonable limit
+		})
+	})
 
-    it('should validate error response formats', async () => {
-      const errorResponse = {
-        success: false,
-        error: 'Validation failed',
-        details: {
-          field: 'email',
-          message: 'Invalid email format'
-        }
-      };
+	describe('Data Validation and Error Handling', () => {
+		it('should validate common data types', async () => {
+			// Email validation
+			const validEmail = 'test@example.com'
+			const invalidEmail = 'invalid-email'
 
-      expect(errorResponse.success).toBe(false);
-      expect(errorResponse.error).toBeTruthy();
-      expect(errorResponse.details).toBeInstanceOf(Object);
+			expect(validEmail).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+			expect(invalidEmail).not.toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
 
-      const successResponse = {
-        success: true,
-        data: { id: 'test-id' }
-      };
+			// Phone number validation
+			const validPhone = '+1234567890'
+			const invalidPhone = '123'
 
-      expect(successResponse.success).toBe(true);
-      expect(successResponse.data).toBeInstanceOf(Object);
-    });
+			expect(validPhone).toMatch(/^\+\d{10,15}$/)
+			expect(invalidPhone).not.toMatch(/^\+\d{10,15}$/)
 
-    it('should validate pagination responses', async () => {
-      const paginatedResponse = {
-        success: true,
-        data: {
-          items: [],
-          totalCount: 0,
-          pagination: {
-            page: 1,
-            limit: 10,
-            totalPages: 0,
-            hasNext: false,
-            hasPrev: false
-          }
-        }
-      };
+			// Date validation
+			const validDate = '2024-12-01T10:00:00Z'
+			const invalidDate = 'invalid-date'
 
-      expect(paginatedResponse.data.items).toBeInstanceOf(Array);
-      expect(paginatedResponse.data.totalCount).toBeGreaterThanOrEqual(0);
-      expect(paginatedResponse.data.pagination.page).toBeGreaterThan(0);
-      expect(paginatedResponse.data.pagination.limit).toBeGreaterThan(0);
-      expect(typeof paginatedResponse.data.pagination.hasNext).toBe('boolean');
-      expect(typeof paginatedResponse.data.pagination.hasPrev).toBe('boolean');
-    });
-  });
-});
+			expect(new Date(validDate).getTime()).not.toBeNaN()
+			expect(new Date(invalidDate).getTime()).toBeNaN()
+
+			// UUID validation (simplified)
+			const validId = 'test-id-123'
+			const invalidId = ''
+
+			expect(validId).toBeTruthy()
+			expect(invalidId).toBeFalsy()
+		})
+
+		it('should validate error response formats', async () => {
+			const errorResponse = {
+				success: false,
+				error: 'Validation failed',
+				details: {
+					field: 'email',
+					message: 'Invalid email format',
+				},
+			}
+
+			expect(errorResponse.success).toBe(false)
+			expect(errorResponse.error).toBeTruthy()
+			expect(errorResponse.details).toBeInstanceOf(Object)
+
+			const successResponse = {
+				success: true,
+				data: { id: 'test-id' },
+			}
+
+			expect(successResponse.success).toBe(true)
+			expect(successResponse.data).toBeInstanceOf(Object)
+		})
+
+		it('should validate pagination responses', async () => {
+			const paginatedResponse = {
+				success: true,
+				data: {
+					items: [],
+					totalCount: 0,
+					pagination: {
+						page: 1,
+						limit: 10,
+						totalPages: 0,
+						hasNext: false,
+						hasPrev: false,
+					},
+				},
+			}
+
+			expect(paginatedResponse.data.items).toBeInstanceOf(Array)
+			expect(paginatedResponse.data.totalCount).toBeGreaterThanOrEqual(0)
+			expect(paginatedResponse.data.pagination.page).toBeGreaterThan(0)
+			expect(paginatedResponse.data.pagination.limit).toBeGreaterThan(0)
+			expect(typeof paginatedResponse.data.pagination.hasNext).toBe('boolean')
+			expect(typeof paginatedResponse.data.pagination.hasPrev).toBe('boolean')
+		})
+	})
+})

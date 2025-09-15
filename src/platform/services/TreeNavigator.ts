@@ -3,333 +3,335 @@
  * Provides depth calculation and navigation utilities for the topic tree
  */
 
-import { ConversationTree, TopicNode as ITopicNode, ITreeNavigator } from '../types/conversation-grading';
-import { TopicNode } from './TopicNode';
+import {
+	ConversationTree,
+	TopicNode as ITopicNode,
+	ITreeNavigator,
+} from '../types/conversation-grading'
+import { TopicNode } from './TopicNode'
 
 export class TreeNavigator implements ITreeNavigator {
-  /**
-   * Calculate depth from root for a given node
-   * Requirements: 3.1, 3.2, 3.3, 3.4
-   */
-  getDepthFromRoot(nodeId: string, tree: ConversationTree): number {
-    const node = tree.nodes.get(nodeId);
-    if (!node) {
-      throw new Error(`Node with ID ${nodeId} not found`);
-    }
+	/**
+	 * Calculate depth from root for a given node
+	 * Requirements: 3.1, 3.2, 3.3, 3.4
+	 */
+	getDepthFromRoot(nodeId: string, tree: ConversationTree): number {
+		const node = tree.nodes.get(nodeId)
+		if (!node) {
+			throw new Error(`Node with ID ${nodeId} not found`)
+		}
 
-    // If it's a root node, depth is 1
-    if (!node.parentTopic) {
-      return 1;
-    }
+		// If it's a root node, depth is 1
+		if (!node.parentTopic) {
+			return 1
+		}
 
-    // Traverse up the tree to calculate depth
-    let depth = 1;
-    let currentNodeId: string | null = nodeId;
+		// Traverse up the tree to calculate depth
+		let depth = 1
+		let currentNodeId: string | null = nodeId
 
-    while (currentNodeId) {
-      const currentNode = tree.nodes.get(currentNodeId);
-      if (!currentNode) {
-        throw new Error(`Node with ID ${currentNodeId} not found during traversal`);
-      }
+		while (currentNodeId) {
+			const currentNode = tree.nodes.get(currentNodeId)
+			if (!currentNode) {
+				throw new Error(`Node with ID ${currentNodeId} not found during traversal`)
+			}
 
-      if (currentNode.parentTopic) {
-        depth++;
-        currentNodeId = currentNode.parentTopic;
-      } else {
-        // Reached root
-        break;
-      }
-    }
+			if (currentNode.parentTopic) {
+				depth++
+				currentNodeId = currentNode.parentTopic
+			} else {
+				// Reached root
+				break
+			}
+		}
 
-    return depth;
-  }
+		return depth
+	}
 
-  /**
-   * Find path between two nodes in the tree
-   * Returns array of node IDs representing the path from fromNodeId to toNodeId
-   */
-  findPath(fromNodeId: string, toNodeId: string, tree: ConversationTree): string[] {
-    if (fromNodeId === toNodeId) {
-      return [fromNodeId];
-    }
+	/**
+	 * Find path between two nodes in the tree
+	 * Returns array of node IDs representing the path from fromNodeId to toNodeId
+	 */
+	findPath(fromNodeId: string, toNodeId: string, tree: ConversationTree): string[] {
+		if (fromNodeId === toNodeId) {
+			return [fromNodeId]
+		}
 
-    const fromNode = tree.nodes.get(fromNodeId);
-    const toNode = tree.nodes.get(toNodeId);
+		const fromNode = tree.nodes.get(fromNodeId)
+		const toNode = tree.nodes.get(toNodeId)
 
-    if (!fromNode || !toNode) {
-      throw new Error('One or both nodes not found');
-    }
+		if (!fromNode || !toNode) {
+			throw new Error('One or both nodes not found')
+		}
 
-    // Get paths from both nodes to root
-    const fromPath = this.getPathToRoot(fromNodeId, tree);
-    const toPath = this.getPathToRoot(toNodeId, tree);
+		// Get paths from both nodes to root
+		const fromPath = this.getPathToRoot(fromNodeId, tree)
+		const toPath = this.getPathToRoot(toNodeId, tree)
 
-    // Find common ancestor
-    const commonAncestor = this.findCommonAncestor(fromPath, toPath);
-    if (!commonAncestor) {
-      throw new Error('No common ancestor found - nodes may be in different trees');
-    }
+		// Find common ancestor
+		const commonAncestor = this.findCommonAncestor(fromPath, toPath)
+		if (!commonAncestor) {
+			throw new Error('No common ancestor found - nodes may be in different trees')
+		}
 
-    // Build path: from -> common ancestor -> to
-    const fromToAncestorIndex = fromPath.indexOf(commonAncestor);
-    const toToAncestorIndex = toPath.indexOf(commonAncestor);
-    
-    const fromToAncestor = fromPath.slice(0, fromToAncestorIndex + 1);
-    const ancestorToTo = toPath.slice(0, toToAncestorIndex).reverse();
+		// Build path: from -> common ancestor -> to
+		const fromToAncestorIndex = fromPath.indexOf(commonAncestor)
+		const toToAncestorIndex = toPath.indexOf(commonAncestor)
 
-    return [...fromToAncestor, ...ancestorToTo];
-  }
+		const fromToAncestor = fromPath.slice(0, fromToAncestorIndex + 1)
+		const ancestorToTo = toPath.slice(0, toToAncestorIndex).reverse()
 
-  /**
-   * Get all leaf nodes (nodes with no children)
-   */
-  getLeafNodes(tree: ConversationTree): ITopicNode[] {
-    const leafNodes: ITopicNode[] = [];
+		return [...fromToAncestor, ...ancestorToTo]
+	}
 
-    for (const [, node] of tree.nodes) {
-      if (node.children.length === 0) {
-        leafNodes.push(node);
-      }
-    }
+	/**
+	 * Get all leaf nodes (nodes with no children)
+	 */
+	getLeafNodes(tree: ConversationTree): ITopicNode[] {
+		const leafNodes: ITopicNode[] = []
 
-    return leafNodes;
-  }
+		for (const [, node] of tree.nodes) {
+			if (node.children.length === 0) {
+				leafNodes.push(node)
+			}
+		}
 
-  /**
-   * Get all unvisited branches (leaf nodes that haven't been visited or exhausted)
-   */
-  getUnvisitedBranches(tree: ConversationTree): ITopicNode[] {
-    const leafNodes = this.getLeafNodes(tree);
-    
-    return leafNodes.filter(node => 
-      !node.metadata.isExhausted && node.metadata.visitCount === 0
-    );
-  }
+		return leafNodes
+	}
 
-  /**
-   * Get the deepest unvisited branch
-   * Returns the leaf node with maximum depth that hasn't been visited
-   */
-  getDeepestUnvisitedBranch(tree: ConversationTree): ITopicNode | null {
-    const unvisitedBranches = this.getUnvisitedBranches(tree);
+	/**
+	 * Get all unvisited branches (leaf nodes that haven't been visited or exhausted)
+	 */
+	getUnvisitedBranches(tree: ConversationTree): ITopicNode[] {
+		const leafNodes = this.getLeafNodes(tree)
 
-    if (unvisitedBranches.length === 0) {
-      return null;
-    }
+		return leafNodes.filter((node) => !node.metadata.isExhausted && node.metadata.visitCount === 0)
+	}
 
-    // Find the branch with maximum depth
-    return unvisitedBranches.reduce((deepest, current) => 
-      current.depth > deepest.depth ? current : deepest
-    );
-  }
+	/**
+	 * Get the deepest unvisited branch
+	 * Returns the leaf node with maximum depth that hasn't been visited
+	 */
+	getDeepestUnvisitedBranch(tree: ConversationTree): ITopicNode | null {
+		const unvisitedBranches = this.getUnvisitedBranches(tree)
 
-  /**
-   * Get all nodes at a specific depth level
-   */
-  getNodesAtDepth(depth: number, tree: ConversationTree): ITopicNode[] {
-    const nodesAtDepth: ITopicNode[] = [];
+		if (unvisitedBranches.length === 0) {
+			return null
+		}
 
-    for (const [, node] of tree.nodes) {
-      if (node.depth === depth) {
-        nodesAtDepth.push(node);
-      }
-    }
+		// Find the branch with maximum depth
+		return unvisitedBranches.reduce((deepest, current) =>
+			current.depth > deepest.depth ? current : deepest,
+		)
+	}
 
-    return nodesAtDepth;
-  }
+	/**
+	 * Get all nodes at a specific depth level
+	 */
+	getNodesAtDepth(depth: number, tree: ConversationTree): ITopicNode[] {
+		const nodesAtDepth: ITopicNode[] = []
 
-  /**
-   * Get the maximum depth in the tree
-   */
-  getMaxDepth(tree: ConversationTree): number {
-    let maxDepth = 0;
+		for (const [, node] of tree.nodes) {
+			if (node.depth === depth) {
+				nodesAtDepth.push(node)
+			}
+		}
 
-    for (const [, node] of tree.nodes) {
-      if (node.depth > maxDepth) {
-        maxDepth = node.depth;
-      }
-    }
+		return nodesAtDepth
+	}
 
-    return maxDepth;
-  }
+	/**
+	 * Get the maximum depth in the tree
+	 */
+	getMaxDepth(tree: ConversationTree): number {
+		let maxDepth = 0
 
-  /**
-   * Get all ancestors of a node (path from node to root, excluding the node itself)
-   */
-  getAncestors(nodeId: string, tree: ConversationTree): ITopicNode[] {
-    const node = tree.nodes.get(nodeId);
-    if (!node) {
-      throw new Error(`Node with ID ${nodeId} not found`);
-    }
+		for (const [, node] of tree.nodes) {
+			if (node.depth > maxDepth) {
+				maxDepth = node.depth
+			}
+		}
 
-    const ancestors: ITopicNode[] = [];
-    let currentNodeId = node.parentTopic;
+		return maxDepth
+	}
 
-    while (currentNodeId) {
-      const currentNode = tree.nodes.get(currentNodeId);
-      if (!currentNode) {
-        throw new Error(`Ancestor node with ID ${currentNodeId} not found`);
-      }
+	/**
+	 * Get all ancestors of a node (path from node to root, excluding the node itself)
+	 */
+	getAncestors(nodeId: string, tree: ConversationTree): ITopicNode[] {
+		const node = tree.nodes.get(nodeId)
+		if (!node) {
+			throw new Error(`Node with ID ${nodeId} not found`)
+		}
 
-      ancestors.push(currentNode);
-      currentNodeId = currentNode.parentTopic;
-    }
+		const ancestors: ITopicNode[] = []
+		let currentNodeId = node.parentTopic
 
-    return ancestors;
-  }
+		while (currentNodeId) {
+			const currentNode = tree.nodes.get(currentNodeId)
+			if (!currentNode) {
+				throw new Error(`Ancestor node with ID ${currentNodeId} not found`)
+			}
 
-  /**
-   * Get all descendants of a node (all children, grandchildren, etc.)
-   */
-  getDescendants(nodeId: string, tree: ConversationTree): ITopicNode[] {
-    const node = tree.nodes.get(nodeId);
-    if (!node) {
-      throw new Error(`Node with ID ${nodeId} not found`);
-    }
+			ancestors.push(currentNode)
+			currentNodeId = currentNode.parentTopic
+		}
 
-    const descendants: ITopicNode[] = [];
-    const queue: string[] = [...node.children];
+		return ancestors
+	}
 
-    while (queue.length > 0) {
-      const currentId = queue.shift()!;
-      const currentNode = tree.nodes.get(currentId);
-      
-      if (currentNode) {
-        descendants.push(currentNode);
-        queue.push(...currentNode.children);
-      }
-    }
+	/**
+	 * Get all descendants of a node (all children, grandchildren, etc.)
+	 */
+	getDescendants(nodeId: string, tree: ConversationTree): ITopicNode[] {
+		const node = tree.nodes.get(nodeId)
+		if (!node) {
+			throw new Error(`Node with ID ${nodeId} not found`)
+		}
 
-    return descendants;
-  }
+		const descendants: ITopicNode[] = []
+		const queue: string[] = [...node.children]
 
-  /**
-   * Get siblings of a node (nodes with the same parent)
-   */
-  getSiblings(nodeId: string, tree: ConversationTree): ITopicNode[] {
-    const node = tree.nodes.get(nodeId);
-    if (!node) {
-      throw new Error(`Node with ID ${nodeId} not found`);
-    }
+		while (queue.length > 0) {
+			const currentId = queue.shift()!
+			const currentNode = tree.nodes.get(currentId)
 
-    // Root nodes don't have siblings in the traditional sense
-    if (!node.parentTopic) {
-      // Return other root nodes as siblings
-      return tree.rootNodes
-        .filter(rootId => rootId !== nodeId)
-        .map(rootId => tree.nodes.get(rootId))
-        .filter((n): n is ITopicNode => n !== undefined);
-    }
+			if (currentNode) {
+				descendants.push(currentNode)
+				queue.push(...currentNode.children)
+			}
+		}
 
-    const parent = tree.nodes.get(node.parentTopic);
-    if (!parent) {
-      throw new Error(`Parent node with ID ${node.parentTopic} not found`);
-    }
+		return descendants
+	}
 
-    return parent.children
-      .filter(childId => childId !== nodeId)
-      .map(childId => tree.nodes.get(childId))
-      .filter((n): n is ITopicNode => n !== undefined);
-  }
+	/**
+	 * Get siblings of a node (nodes with the same parent)
+	 */
+	getSiblings(nodeId: string, tree: ConversationTree): ITopicNode[] {
+		const node = tree.nodes.get(nodeId)
+		if (!node) {
+			throw new Error(`Node with ID ${nodeId} not found`)
+		}
 
-  /**
-   * Check if one node is an ancestor of another
-   */
-  isAncestor(ancestorId: string, descendantId: string, tree: ConversationTree): boolean {
-    if (ancestorId === descendantId) {
-      return false; // A node is not its own ancestor
-    }
+		// Root nodes don't have siblings in the traditional sense
+		if (!node.parentTopic) {
+			// Return other root nodes as siblings
+			return tree.rootNodes
+				.filter((rootId) => rootId !== nodeId)
+				.map((rootId) => tree.nodes.get(rootId))
+				.filter((n): n is ITopicNode => n !== undefined)
+		}
 
-    const ancestors = this.getAncestors(descendantId, tree);
-    return ancestors.some(ancestor => ancestor.id === ancestorId);
-  }
+		const parent = tree.nodes.get(node.parentTopic)
+		if (!parent) {
+			throw new Error(`Parent node with ID ${node.parentTopic} not found`)
+		}
 
-  /**
-   * Check if one node is a descendant of another
-   */
-  isDescendant(descendantId: string, ancestorId: string, tree: ConversationTree): boolean {
-    return this.isAncestor(ancestorId, descendantId, tree);
-  }
+		return parent.children
+			.filter((childId) => childId !== nodeId)
+			.map((childId) => tree.nodes.get(childId))
+			.filter((n): n is ITopicNode => n !== undefined)
+	}
 
-  /**
-   * Get the current position in the tree based on the current path
-   */
-  getCurrentPosition(tree: ConversationTree): {
-    currentNode: ITopicNode | null;
-    depth: number;
-    pathFromRoot: string[];
-    availableChildren: ITopicNode[];
-    siblings: ITopicNode[];
-  } {
-    if (tree.currentPath.length === 0) {
-      return {
-        currentNode: null,
-        depth: 0,
-        pathFromRoot: [],
-        availableChildren: [],
-        siblings: []
-      };
-    }
+	/**
+	 * Check if one node is an ancestor of another
+	 */
+	isAncestor(ancestorId: string, descendantId: string, tree: ConversationTree): boolean {
+		if (ancestorId === descendantId) {
+			return false // A node is not its own ancestor
+		}
 
-    const currentNodeId = tree.currentPath[tree.currentPath.length - 1];
-    const currentNode = tree.nodes.get(currentNodeId);
+		const ancestors = this.getAncestors(descendantId, tree)
+		return ancestors.some((ancestor) => ancestor.id === ancestorId)
+	}
 
-    if (!currentNode) {
-      throw new Error(`Current node with ID ${currentNodeId} not found`);
-    }
+	/**
+	 * Check if one node is a descendant of another
+	 */
+	isDescendant(descendantId: string, ancestorId: string, tree: ConversationTree): boolean {
+		return this.isAncestor(ancestorId, descendantId, tree)
+	}
 
-    const availableChildren = currentNode.children
-      .map(childId => tree.nodes.get(childId))
-      .filter((n): n is ITopicNode => n !== undefined);
+	/**
+	 * Get the current position in the tree based on the current path
+	 */
+	getCurrentPosition(tree: ConversationTree): {
+		currentNode: ITopicNode | null
+		depth: number
+		pathFromRoot: string[]
+		availableChildren: ITopicNode[]
+		siblings: ITopicNode[]
+	} {
+		if (tree.currentPath.length === 0) {
+			return {
+				currentNode: null,
+				depth: 0,
+				pathFromRoot: [],
+				availableChildren: [],
+				siblings: [],
+			}
+		}
 
-    const siblings = this.getSiblings(currentNodeId, tree);
+		const currentNodeId = tree.currentPath[tree.currentPath.length - 1]
+		const currentNode = tree.nodes.get(currentNodeId)
 
-    return {
-      currentNode,
-      depth: currentNode.depth,
-      pathFromRoot: [...tree.currentPath],
-      availableChildren,
-      siblings
-    };
-  }
+		if (!currentNode) {
+			throw new Error(`Current node with ID ${currentNodeId} not found`)
+		}
 
-  /**
-   * Private helper: Get path from node to root
-   */
-  private getPathToRoot(nodeId: string, tree: ConversationTree): string[] {
-    const path: string[] = [];
-    let currentNodeId: string | null = nodeId;
+		const availableChildren = currentNode.children
+			.map((childId) => tree.nodes.get(childId))
+			.filter((n): n is ITopicNode => n !== undefined)
 
-    while (currentNodeId) {
-      path.push(currentNodeId);
-      const currentNode = tree.nodes.get(currentNodeId);
-      
-      if (!currentNode) {
-        throw new Error(`Node with ID ${currentNodeId} not found during path traversal`);
-      }
+		const siblings = this.getSiblings(currentNodeId, tree)
 
-      currentNodeId = currentNode.parentTopic;
-    }
+		return {
+			currentNode,
+			depth: currentNode.depth,
+			pathFromRoot: [...tree.currentPath],
+			availableChildren,
+			siblings,
+		}
+	}
 
-    return path;
-  }
+	/**
+	 * Private helper: Get path from node to root
+	 */
+	private getPathToRoot(nodeId: string, tree: ConversationTree): string[] {
+		const path: string[] = []
+		let currentNodeId: string | null = nodeId
 
-  /**
-   * Private helper: Find common ancestor between two paths
-   * Paths are from node to root, so we need to find the first common node
-   */
-  private findCommonAncestor(path1: string[], path2: string[]): string | null {
-    // Convert paths to sets for efficient lookup
-    const set1 = new Set(path1);
-    
-    // Look for the first common node in path2
-    // Since paths go from node to root, the first common node found is the lowest common ancestor
-    for (const nodeId of path2) {
-      if (set1.has(nodeId)) {
-        return nodeId;
-      }
-    }
+		while (currentNodeId) {
+			path.push(currentNodeId)
+			const currentNode = tree.nodes.get(currentNodeId)
 
-    return null;
-  }
+			if (!currentNode) {
+				throw new Error(`Node with ID ${currentNodeId} not found during path traversal`)
+			}
+
+			currentNodeId = currentNode.parentTopic
+		}
+
+		return path
+	}
+
+	/**
+	 * Private helper: Find common ancestor between two paths
+	 * Paths are from node to root, so we need to find the first common node
+	 */
+	private findCommonAncestor(path1: string[], path2: string[]): string | null {
+		// Convert paths to sets for efficient lookup
+		const set1 = new Set(path1)
+
+		// Look for the first common node in path2
+		// Since paths go from node to root, the first common node found is the lowest common ancestor
+		for (const nodeId of path2) {
+			if (set1.has(nodeId)) {
+				return nodeId
+			}
+		}
+
+		return null
+	}
 }
