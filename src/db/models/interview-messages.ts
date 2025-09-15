@@ -22,7 +22,7 @@ export const interviewMessages = pgTable(
 	(table) => [index().on(table.userId, table.createdAt, table.id)],
 )
 
-export const messageRelations = relations(interviewMessages, ({ one }) => ({
+export const interviewMessagesRelations = relations(interviewMessages, ({ one }) => ({
 	conversation: one(users, {
 		fields: [interviewMessages.userId],
 		references: [users.id],

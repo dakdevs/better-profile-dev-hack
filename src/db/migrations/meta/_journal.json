@@ -29,6 +29,13 @@
       "when": 1757926462010,
       "tag": "0003_dark_marten_broadcloak",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1757958593740,
+      "tag": "0004_goofy_skaar",
+      "breakpoints": true
     }
   ]
 }
