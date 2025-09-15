@@ -53,7 +53,7 @@ class SkillExtractionService {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
+				model: 'openai/gpt-4o-mini',
 				messages: [
 					{
 						role: 'system',
