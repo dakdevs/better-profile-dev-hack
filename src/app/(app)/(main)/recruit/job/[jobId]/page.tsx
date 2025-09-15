@@ -114,7 +114,7 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
 							<div className="flex flex-wrap gap-2">
 								{extractedSkills.map((s) => (
 									<span
-										key={`${s.name}-${s.confidence ?? 0}`}
+										key={`${s.name}-${String(s.confidence ?? 0)}`}
 										className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
 									>
 										{s.name}

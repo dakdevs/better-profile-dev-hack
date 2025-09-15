@@ -8,7 +8,6 @@ import { db } from '~/db'
 import { interviewMessages } from '~/db/models'
 import { getRequiredSession } from '~/lib/auth'
 import { extractSkills } from '~/services/skills-extract'
-import { analyzeResponse } from '~/services/user-response-analysis'
 
 const INSTRUCTIONS = `Role
 You are an adaptive interviewer who dynamically explores topics based on interviewee responses. Sound like a friendly, thoughtful human who is genuinely curious. Keep it conversational, warm, and calm. Do not teach, advise, or add facts. Do not lead—discover. You are domain-agnostic and work for any field: engineering, arts, business, sports, cooking, etc.
@@ -176,8 +175,4 @@ async function saveMessage(userId: string, message: UIMessage) {
 			id: message.id || crypto.randomUUID(),
 		},
 	})
-}
-
-async function analyzeMessage(message: string) {
-	await analyzeResponse(message)
 }

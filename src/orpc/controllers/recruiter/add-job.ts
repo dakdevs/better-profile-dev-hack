@@ -29,13 +29,13 @@ export default protectedBase
 		const parsed = await parseJob(input)
 
 		if (!parsed) {
-			throw errors.FAILED_TO_PARSE_JOB
+			throw errors.FAILED_TO_PARSE_JOB()
 		}
 
 		await db.insert(jobPostings).values({
 			userId: context.auth.user.id,
 			rawDescription: parsed.jobDescription,
-			title: parsed.jobTitle,
+			title: parsed.jobTitle || '',
 			experienceLevel: parsed.result.experienceLevel,
 			extractedSkills: parsed.result.extractedSkills,
 			preferredSkills: parsed.result.preferredSkills,

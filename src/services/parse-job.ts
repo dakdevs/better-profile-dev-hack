@@ -1,6 +1,4 @@
-import { NextResponse } from 'next/server'
 import { convert } from 'html-to-text'
-import { z } from 'zod'
 
 import { serverConfig } from '~/config/server-config'
 
@@ -267,19 +265,38 @@ export function stripHtmlTags(html: string): string {
 
 	return cleanText
 }
-export function extractAndClean(data: any): string {
-	const htmlToConvert = data.content || data.description || data.job_description || ''
+export function extractAndClean(data: unknown): string {
+	const obj = typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {}
 
-	if (!htmlToConvert) {
+	const htmlSource =
+		(typeof obj.content === 'string' && obj.content)
+		|| (typeof obj.description === 'string' && obj.description)
+		|| (typeof obj.job_description === 'string' && obj.job_description)
+		|| ''
+
+	if (!htmlSource) {
 		return ''
 	}
 
 	// Use the improved HTML stripping function
-	const descriptionText = stripHtmlTags(htmlToConvert)
+	const descriptionText = stripHtmlTags(htmlSource)
 
-	const title = data.title || ''
-	const location = data.location?.name || ''
-	const company = data.company || data.company_name || ''
+	const title = typeof obj.title === 'string' ? obj.title : ''
+
+	let location = ''
+	if (typeof obj.location === 'string') {
+		location = obj.location
+	} else if (obj.location && typeof obj.location === 'object') {
+		const loc = obj.location as Record<string, unknown>
+		location = typeof loc.name === 'string' ? loc.name : ''
+	}
+
+	const company =
+		typeof obj.company === 'string'
+			? obj.company
+			: typeof obj.company_name === 'string'
+				? obj.company_name
+				: ''
 
 	const header = [
 		title,
@@ -292,19 +309,16 @@ export function extractAndClean(data: any): string {
 	return `${header}\n\n${descriptionText}`.trim()
 }
 
-const schema = z.discriminatedUnion('type', [
-	z.object({
-		type: z.literal('url'),
-		jobUrl: z.url('Job URL is required'),
-	}),
-	z.object({
-		type: z.literal('description'),
-		jobTitle: z.string().min(1, 'Job title is required'),
-		jobDescription: z.string().min(1, 'Job description is required'),
-	}),
-])
+type ParseJobInput =
+	| { type: 'url'; jobUrl: string }
+	| { type: 'description'; jobTitle: string; jobDescription: string }
 
-type ParseJobInput = z.input<typeof schema>
+function getJobTitleFromApi(data: unknown): string | undefined {
+	if (!data || typeof data !== 'object') return undefined
+	const obj = data as Record<string, unknown>
+
+	return typeof obj.title === 'string' ? obj.title : undefined
+}
 
 export default async function parseJob(input: ParseJobInput) {
 	if (input.type === 'url') {
@@ -317,11 +331,10 @@ export default async function parseJob(input: ParseJobInput) {
 			if (!response.ok) {
 				return null
 			}
-
-			const data = await response.json()
+			const data: unknown = await response.json()
 
 			const jobDescription = extractAndClean(data)
-			const jobTitle = data.title
+			const jobTitle = getJobTitleFromApi(data)
 
 			const jobAnalysisService = new JobAnalysisService()
 
@@ -335,7 +348,7 @@ export default async function parseJob(input: ParseJobInput) {
 		} else {
 			return null
 		}
-	} else if (input.type === 'description') {
+	} else {
 		const { jobTitle, jobDescription } = input
 
 		const jobAnalysisService = new JobAnalysisService()

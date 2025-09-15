@@ -32,6 +32,9 @@ export function ApiKeyForm({
 			})
 			router.refresh()
 		},
+		validators: {
+			onSubmit: formSchema,
+		},
 	})
 
 	return (

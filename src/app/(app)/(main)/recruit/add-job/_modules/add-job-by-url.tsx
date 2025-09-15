@@ -28,6 +28,9 @@ export function AddJobByUrlForm() {
 			})
 			router.push('/recruit')
 		},
+		validators: {
+			onSubmit: formSchema,
+		},
 	})
 
 	return (

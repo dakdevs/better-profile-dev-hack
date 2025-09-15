@@ -20,7 +20,7 @@ export default protectedBase
 		const isValid = await isValidApiKey(input.apiKey)
 
 		if (!isValid) {
-			throw errors.INVALID_API_KEY
+			throw errors.INVALID_API_KEY()
 		}
 
 		await db
