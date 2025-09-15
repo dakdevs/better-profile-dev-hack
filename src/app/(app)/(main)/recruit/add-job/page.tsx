@@ -8,13 +8,13 @@ export default function AddJobPage() {
 	return (
 		<div className="px-md md:px-lg gap-md grid">
 			<div className="flex items-center justify-between">
-				<h2 className="text-2xl font-bold">Add Job</h2>
+				<h2 className="text-2xl font-bold">{'Add Job'}</h2>
 				<Button
 					component={Link}
 					href="/recruit"
 					leftSection={<ArrowLeftIcon size={16} />}
 				>
-					Back
+					{'Back'}
 				</Button>
 			</div>
 			<div className="p-md w-full rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-black">

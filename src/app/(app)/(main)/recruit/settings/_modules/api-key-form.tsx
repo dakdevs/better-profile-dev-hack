@@ -50,15 +50,15 @@ export function ApiKeyForm({
 							label="Cal.com API Key"
 							description={
 								<>
-									You can find your API key in your Cal.com settings under 'API Keys' (
+									{"You can find your API key in your Cal.com settings under 'API Keys' ("}
 									<Link
 										href="https://app.cal.com/settings/developer/api-keys"
 										target="_blank"
 										className="font-bold hover:underline"
 									>
-										Click Here
+										{'Click Here'}
 									</Link>
-									)
+									{')'}
 								</>
 							}
 						/>

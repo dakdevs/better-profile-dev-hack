@@ -88,6 +88,7 @@ export class JobAnalysisService {
 			if (!content) {
 				throw new Error('Invalid AI response format')
 			}
+
 			return this.parseAIResponse(content)
 		} catch (error) {
 			console.error('Error in job analysis:', error)
@@ -127,6 +128,7 @@ Return ONLY the JSON object.`.trim()
 				.replace(/```\s*/g, '')
 				.trim()
 			const parsed = JSON.parse(cleanedResponse) as JobAnalysisResult
+
 			return parsed
 		} catch (err) {
 			console.error('Failed to parse AI response', { response, error: err })

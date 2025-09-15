@@ -19,7 +19,7 @@ export default async function RecruitPage() {
 						href="/recruit/add-job"
 						leftSection={<PlusIcon size={16} />}
 					>
-						Add Job
+						{'Add Job'}
 					</Button>
 				</div>
 				<Button
@@ -27,19 +27,21 @@ export default async function RecruitPage() {
 					href="/recruit/settings"
 					leftSection={<CogIcon size={16} />}
 				>
-					Settings
+					{'Settings'}
 				</Button>
 			</div>
 			{jobs.length === 0 ? (
 				<div className="py-2xl gap-sm flex w-full flex-col items-center justify-center rounded-md border border-dashed border-gray-200 bg-white text-center dark:border-gray-700 dark:bg-black">
-					<h3 className="text-lg font-bold">No jobs found</h3>
-					<p className="mb-2 text-sm text-gray-500">Add your first job posting to get started.</p>
+					<h3 className="text-lg font-bold">{'No jobs found'}</h3>
+					<p className="mb-2 text-sm text-gray-500">
+						{'Add your first job posting to get started.'}
+					</p>
 					<Button
 						component={Link}
 						href="/recruit/add-job"
 						leftSection={<PlusIcon size={16} />}
 					>
-						Add Job
+						{'Add Job'}
 					</Button>
 				</div>
 			) : (

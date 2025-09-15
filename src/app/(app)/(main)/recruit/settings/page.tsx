@@ -13,7 +13,7 @@ export default async function RecruitSettingsPage() {
 
 	return (
 		<div className="px-md md:px-lg gap-md grid">
-			<h2 className="text-2xl font-bold">Settings</h2>
+			<h2 className="text-2xl font-bold">{'Settings'}</h2>
 			<div className="p-md w-full rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-black">
 				<ApiKeyForm initialValues={{ apiKey: currentSettings.apiKey }} />
 			</div>
@@ -23,7 +23,7 @@ export default async function RecruitSettingsPage() {
 					href="/recruit"
 					leftSection={<ArrowLeftIcon size={16} />}
 				>
-					Back to Recruiter Dashboard
+					{'Back to Recruiter Dashboard'}
 				</Button>
 			</div>
 		</div>

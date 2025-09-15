@@ -32,13 +32,22 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
 				<div className="gap-sm flex flex-col">
 					<h1 className="text-2xl font-bold md:text-3xl">{job.title}</h1>
 					<div className="gap-sm flex flex-wrap items-center text-sm text-gray-500">
-						<span>Posted {job.createdAt.toLocaleDateString()}</span>
-						<span className="text-gray-300">•</span>
-						<span>Experience: {experienceLabel}</span>
+						<span>
+							{'Posted '}
+							{job.createdAt.toLocaleDateString()}
+						</span>
+						<span className="text-gray-300">{'•'}</span>
+						<span>
+							{'Experience: '}
+							{experienceLabel}
+						</span>
 						{salaryMin || salaryMax ? (
 							<>
-								<span className="text-gray-300">•</span>
-								<span>Salary: {formatSalaryRange(salaryMin, salaryMax)}</span>
+								<span className="text-gray-300">{'•'}</span>
+								<span>
+									{'Salary: '}
+									{formatSalaryRange(salaryMin, salaryMax)}
+								</span>
 							</>
 						) : null}
 					</div>
@@ -48,13 +57,13 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
 					href="/recruit"
 					leftSection={<ArrowLeftIcon size={16} />}
 				>
-					Back
+					{'Back'}
 				</Button>
 			</div>
 
 			<div className="gap-md grid grid-cols-1 md:grid-cols-3">
 				<div className="p-md gap-sm col-span-2 flex flex-col rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-black">
-					<h2 className="text-lg font-semibold">Job Description</h2>
+					<h2 className="text-lg font-semibold">{'Job Description'}</h2>
 					<p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-700 dark:text-gray-300">
 						{job.rawDescription}
 					</p>
@@ -62,9 +71,9 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
 
 				<div className="gap-md flex flex-col">
 					<div className="p-md gap-sm flex flex-col rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-black">
-						<h3 className="text-md font-semibold">Required Skills</h3>
+						<h3 className="text-md font-semibold">{'Required Skills'}</h3>
 						{requiredSkills.length === 0 ? (
-							<p className="text-sm text-gray-500">None specified</p>
+							<p className="text-sm text-gray-500">{'None specified'}</p>
 						) : (
 							<div className="flex flex-wrap gap-2">
 								{requiredSkills.map((s) => (
@@ -80,9 +89,9 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
 					</div>
 
 					<div className="p-md gap-sm flex flex-col rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-black">
-						<h3 className="text-md font-semibold">Preferred Skills</h3>
+						<h3 className="text-md font-semibold">{'Preferred Skills'}</h3>
 						{preferredSkills.length === 0 ? (
-							<p className="text-sm text-gray-500">None specified</p>
+							<p className="text-sm text-gray-500">{'None specified'}</p>
 						) : (
 							<div className="flex flex-wrap gap-2">
 								{preferredSkills.map((s) => (
@@ -98,9 +107,9 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
 					</div>
 
 					<div className="p-md gap-sm flex flex-col rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-black">
-						<h3 className="text-md font-semibold">Extracted Skills</h3>
+						<h3 className="text-md font-semibold">{'Extracted Skills'}</h3>
 						{extractedSkills.length === 0 ? (
-							<p className="text-sm text-gray-500">None extracted</p>
+							<p className="text-sm text-gray-500">{'None extracted'}</p>
 						) : (
 							<div className="flex flex-wrap gap-2">
 								{extractedSkills.map((s) => (
@@ -111,7 +120,8 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
 										{s.name}
 										{s.confidence != null ? (
 											<span className="ml-1 text-[10px] text-gray-500">
-												{Math.round(s.confidence * 100)}%
+												{Math.round(s.confidence * 100)}
+												{'%'}
 											</span>
 										) : null}
 									</span>
@@ -123,18 +133,18 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
 			</div>
 
 			<div className="p-md gap-xs flex flex-col rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-black">
-				<h2 className="text-lg font-semibold">Metadata</h2>
+				<h2 className="text-lg font-semibold">{'Metadata'}</h2>
 				<div className="gap-sm grid grid-cols-1 text-sm md:grid-cols-3">
 					<div>
-						<p className="text-gray-500">Job ID</p>
+						<p className="text-gray-500">{'Job ID'}</p>
 						<p className="font-mono text-gray-900 dark:text-gray-100">{job.id}</p>
 					</div>
 					<div>
-						<p className="text-gray-500">Created</p>
+						<p className="text-gray-500">{'Created'}</p>
 						<p>{job.createdAt.toLocaleString()}</p>
 					</div>
 					<div>
-						<p className="text-gray-500">Updated</p>
+						<p className="text-gray-500">{'Updated'}</p>
 						<p>{job.updatedAt.toLocaleString()}</p>
 					</div>
 				</div>
@@ -165,6 +175,7 @@ function coerceNamedSkills(value: unknown): NamedSkill[] {
 			}
 		}
 	}
+
 	return items
 }
 
@@ -181,6 +192,7 @@ function coerceExtractedSkills(value: unknown): ExtractedSkill[] {
 			}
 		}
 	}
+
 	return items
 }
 
@@ -189,8 +201,10 @@ function normalizeCurrency(value: unknown): number | undefined {
 	if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
 	if (typeof value === 'string') {
 		const parsed = Number.parseFloat(value)
+
 		return Number.isFinite(parsed) ? parsed : undefined
 	}
+
 	return undefined
 }
 
@@ -209,5 +223,6 @@ function formatSalaryRange(min?: number, max?: number): string {
 	if (max != null) {
 		return `Up to ${formatter.format(max)}`
 	}
+
 	return 'Unspecified'
 }

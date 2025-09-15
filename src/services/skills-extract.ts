@@ -4,8 +4,12 @@ import { serverConfig } from '~/config/server-config'
 
 // Minimal logger to mirror existing behavior
 const logger = {
-	info: (...args: any[]) => console.log('[INFO]', ...args),
-	error: (...args: any[]) => console.error('[ERROR]', ...args),
+	info: (...args: any[]) => {
+		console.log('[INFO]', ...args)
+	},
+	error: (...args: any[]) => {
+		console.error('[ERROR]', ...args)
+	},
 }
 
 // Types used by extraction
@@ -71,6 +75,7 @@ class SkillExtractionService {
 		}
 
 		const data = await resp.json()
+
 		return this.parseAISkillResponse(data)
 	}
 
