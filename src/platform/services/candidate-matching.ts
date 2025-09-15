@@ -1,5 +1,5 @@
-import { db } from '~/db';
-import { userSkills, user, jobPostings, candidateJobMatches } from '~/db/schema';
+import { db } from '~/platform/db';
+import { userSkills, user, jobPostings, candidateJobMatches } from '~/platform/db/schema';
 import { eq, and, gte, sql, desc, asc } from 'drizzle-orm';
 import { 
   CandidateWithMatch, 
@@ -8,12 +8,12 @@ import {
   OverallFit,
   JobPosting,
   CandidateJobMatch
-} from '~/types/interview-management';
+} from '~/platform/types/interview-management';
 import { nanoid } from 'nanoid';
-import { cache, cacheKeys, cacheTTL, cacheUtils } from '~/lib/cache';
-import { rateLimiters, rateLimit } from '~/lib/rate-limiter';
-import { paginationHelpers, PaginationParams, PaginationResult } from '~/lib/pagination';
-import { logger, withLogging } from '~/lib/logger';
+import { cache, cacheKeys, cacheTTL, cacheUtils } from '~/platform/lib/cache';
+import { rateLimiters, rateLimit } from '~/platform/lib/rate-limiter';
+import { paginationHelpers, PaginationParams, PaginationResult } from '~/platform/lib/pagination';
+import { logger, withLogging } from '~/platform/lib/logger';
 
 export interface CandidateWithSkills {
   id: string;
