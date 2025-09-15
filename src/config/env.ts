@@ -5,10 +5,14 @@ export const isDevelopment = process.env.NODE_ENV !== 'production'
 
 export const env = createEnv({
 	client: {
+<<<<<<< HEAD
+		NEXT_PUBLIC_APP_HOST: isDevelopment ? z.string().url().default('http://localhost:3000') : z.string().url(),
+=======
 		// App
 		NEXT_PUBLIC_APP_HOST: isDevelopment ? z.url().default('http://localhost:3000') : z.url(),
 		// Cal.com
 		NEXT_PUBLIC_CAL_OAUTH_CLIENT_ID: z.string(),
+>>>>>>> production
 	},
 	server: {
 		// App
@@ -29,10 +33,14 @@ export const env = createEnv({
 		CALCOM_ORGANIZATION_ID: z.string(),
 		// Vercel
 		AI_GATEWAY_API_KEY: isDevelopment ? z.string() : z.string().optional(),
+<<<<<<< HEAD
+		SUPERMEMORY_KEY: isDevelopment ? z.string().optional() : z.string(),
+=======
 		// Supermemory
 		SUPERMEMORY_KEY: z.string(),
 		// Anthropic
 		ANTHROPIC_API_KEY: z.string(),
+>>>>>>> production
 	},
 	runtimeEnv: {
 		NEXT_PUBLIC_APP_HOST: process.env.NEXT_PUBLIC_APP_HOST,
