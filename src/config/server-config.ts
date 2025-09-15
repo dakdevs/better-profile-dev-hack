@@ -30,4 +30,7 @@ export const serverConfig = {
 	openai: {
 		apiKey: env.OPENAI_API_KEY,
 	},
+	openRouter: {
+		apiKey: env.OPENROUTER_API_KEY,
+	},
 }

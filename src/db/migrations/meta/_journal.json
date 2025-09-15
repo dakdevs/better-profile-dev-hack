@@ -15,6 +15,13 @@
       "when": 1757921764837,
       "tag": "0001_jazzy_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757925815833,
+      "tag": "0002_stormy_the_spike",
+      "breakpoints": true
     }
   ]
 }
