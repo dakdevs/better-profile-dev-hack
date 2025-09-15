@@ -6,7 +6,6 @@ import { createAnthropicGatewayWithSupermemory } from '~/ai/lib/anthropic'
 import { serverConfig } from '~/config/server-config'
 import { db } from '~/db'
 import { interviewMessages } from '~/db/models'
-import { userSkills } from '~/db/models/user-skills'
 import { getRequiredSession } from '~/lib/auth'
 import { extractSkills } from '~/services/skills-extract'
 
@@ -119,7 +118,8 @@ export async function POST(request: Request) {
 				if (role === 'user' && typeof content === 'string') {
 					console.warn('Analyzing user message:', content)
 
-					const extractionResult = await extractSkills(content)
+					// TODO Sumi use this
+					const _extractionResult = await extractSkills(content)
 
 					// TODO: Sumi do
 					// await db.insert(userSkills).values()
