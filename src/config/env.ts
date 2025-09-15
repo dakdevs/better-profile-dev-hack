@@ -5,14 +5,12 @@ export const isDevelopment = process.env.NODE_ENV !== 'production'
 
 export const env = createEnv({
 	client: {
-<<<<<<< HEAD
-		NEXT_PUBLIC_APP_HOST: isDevelopment ? z.string().url().default('http://localhost:3000') : z.string().url(),
-=======
+
 		// App
 		NEXT_PUBLIC_APP_HOST: isDevelopment ? z.url().default('http://localhost:3000') : z.url(),
 		// Cal.com
 		NEXT_PUBLIC_CAL_OAUTH_CLIENT_ID: z.string(),
->>>>>>> production
+
 	},
 	server: {
 		// App
