@@ -2,6 +2,8 @@ import { index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-c
 
 import { users } from '~/db/models/users'
 
+import { timestamps } from '../utils'
+
 export const userSkills = pgTable(
 	'user_skills',
 	{
@@ -17,8 +19,7 @@ export const userSkills = pgTable(
 		averageEngagement: text('average_engagement').default('medium'),
 		topicDepthAverage: text('topic_depth_average').default('0'),
 		synonyms: text('synonyms'),
-		createdAt: timestamp('created_at').notNull().defaultNow(),
-		updatedAt: timestamp('updated_at').notNull().defaultNow(),
+		...timestamps,
 	},
 	(table) => [index('user_skills_user_skill_idx').on(table.userId, table.skillName)],
 )

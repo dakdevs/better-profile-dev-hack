@@ -18,7 +18,15 @@ const link = new RPCLink({
 
 		const { headers } = await import('next/headers')
 
-		return Object.fromEntries(await headers())
+		const derivedHeaders = {
+			...Object.fromEntries(await headers()),
+		}
+
+		if (typeof window !== 'undefined') {
+			derivedHeaders['x-timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone
+		}
+
+		return derivedHeaders
 	},
 	interceptors: [
 		onError((error) => {

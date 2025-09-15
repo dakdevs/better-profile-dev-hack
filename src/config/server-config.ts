@@ -17,9 +17,9 @@ export const serverConfig = {
 		},
 	},
 	calcom: {
-		clientId: env.CALCOM_CLIENT_ID,
-		clientSecret: env.CALCOM_CLIENT_SECRET,
-		organizationId: env.CALCOM_ORGANIZATION_ID,
+		clientId: env.NEXT_PUBLIC_CAL_OAUTH_CLIENT_ID,
+		clientSecret: env.CAL_OAUTH_CLIENT_SECRET,
+		organizationId: Number(env.CALCOM_ORGANIZATION_ID),
 	},
 	supermemory: {
 		key: env.SUPERMEMORY_KEY,
@@ -29,5 +29,11 @@ export const serverConfig = {
 	},
 	openai: {
 		apiKey: env.OPENAI_API_KEY,
+	},
+	openRouter: {
+		apiKey: env.OPENROUTER_API_KEY,
+	},
+	anthropic: {
+		apiKey: env.ANTHROPIC_API_KEY,
 	},
 }

@@ -1,4 +1,4 @@
-import { Cog, Home, Speech, SquareEqual, Users, type LucideIcon } from 'lucide-react'
+import { Cog, Speech, SquareEqual, Users, type LucideIcon } from 'lucide-react'
 
 type NavigationItem = {
 	label: string
@@ -7,11 +7,6 @@ type NavigationItem = {
 }
 
 export const mainNavigationItems = [
-	{
-		label: 'Home',
-		href: '/',
-		icon: Home,
-	},
 	{
 		label: 'My Interview',
 		href: '/interview',

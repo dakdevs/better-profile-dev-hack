@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 
 import PageContainer from '~/components/page-container'
 
+import '@calcom/atoms/globals.min.css'
+
 export default function RecruitLayout({ children }: { children: ReactNode }) {
 	return (
 		<PageContainer

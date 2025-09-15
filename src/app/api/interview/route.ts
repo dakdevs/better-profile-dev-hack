@@ -2,12 +2,12 @@ import { after } from 'next/server'
 import { convertToModelMessages, streamText, UIMessage, validateUIMessages } from 'ai'
 import z from 'zod'
 
-import { createVercelGatewayWithSupermemory } from '~/ai/lib/vercel'
+import { createAnthropicGatewayWithSupermemory } from '~/ai/lib/anthropic'
 import { serverConfig } from '~/config/server-config'
 import { db } from '~/db'
 import { interviewMessages } from '~/db/models'
 import { getRequiredSession } from '~/lib/auth'
-import { analyzeResponse } from '~/services/user-response-analysis'
+import { extractSkills } from '~/services/skills-extract'
 
 const INSTRUCTIONS = `Role
 You are an adaptive interviewer who dynamically explores topics based on interviewee responses. Sound like a friendly, thoughtful human who is genuinely curious. Keep it conversational, warm, and calm. Do not teach, advise, or add facts. Do not lead—discover. You are domain-agnostic and work for any field: engineering, arts, business, sports, cooking, etc.
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 				if (role === 'user' && typeof content === 'string') {
 					console.warn('Analyzing user message:', content)
 
-					await analyzeMessage(content)
+					await extractSkills(content)
 				}
 			})
 		},
@@ -128,9 +128,9 @@ export async function POST(request: Request) {
 function getModel(userId: string) {
 	const { isDevelopment } = serverConfig.app
 	const envPrefix = isDevelopment ? 'dev' : 'prod'
-	const gateway = createVercelGatewayWithSupermemory(`${envPrefix}_user_${userId}`)
+	const gateway = createAnthropicGatewayWithSupermemory(`${envPrefix}_user_${userId}`)
 
-	return gateway('gpt-5-mini')
+	return gateway('claude-sonnet-4-20250514')
 }
 
 async function parseRequest(request: Request) {
@@ -175,8 +175,4 @@ async function saveMessage(userId: string, message: UIMessage) {
 			id: message.id || crypto.randomUUID(),
 		},
 	})
-}
-
-async function analyzeMessage(message: string) {
-	await analyzeResponse(message)
 }

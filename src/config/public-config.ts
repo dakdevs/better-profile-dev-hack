@@ -5,4 +5,7 @@ export const publicConfig = {
 		isDevelopment,
 		host: env.NEXT_PUBLIC_APP_HOST,
 	},
+	calcom: {
+		clientId: env.NEXT_PUBLIC_CAL_OAUTH_CLIENT_ID,
+	},
 }
