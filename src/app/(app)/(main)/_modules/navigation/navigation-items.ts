@@ -8,11 +8,6 @@ type NavigationItem = {
 
 export const mainNavigationItems = [
 	{
-		label: 'Home',
-		href: '/',
-		icon: Home,
-	},
-	{
 		label: 'My Interview',
 		href: '/interview',
 		icon: Speech,
