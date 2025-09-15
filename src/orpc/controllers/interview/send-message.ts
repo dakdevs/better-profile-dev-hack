@@ -10,6 +10,7 @@ import {
 import z from 'zod'
 
 import { vercel } from '~/ai/lib/vercel'
+import { extractSkills, saveExtractedSkillsForUser } from '~/services/skills-extract'
 import { db } from '~/db'
 import { interviewMessages } from '~/db/models'
 import { protectedBase } from '~/orpc/middleware/bases'
@@ -105,6 +106,23 @@ export default protectedBase
 				createdAt: now,
 				content: input.message,
 			})
+
+			// Extract and persist user skills from the latest user message content
+			try {
+				if (input.message.role === 'user') {
+					const textContent = typeof input.message.content === 'string'
+						? input.message.content
+						: Array.isArray(input.message.content)
+							? input.message.content.map((c: any) => (typeof c?.text === 'string' ? c.text : '')).join('\n')
+							: ''
+					if (textContent) {
+						const extracted = await extractSkills(textContent)
+						await saveExtractedSkillsForUser(context.auth.user.id, extracted.skills)
+					}
+				}
+			} catch (err) {
+				console.error('Failed to extract/save skills from chat', err)
+			}
 		})
 
 		const messagesList = await db.query.interviewMessages.findMany({

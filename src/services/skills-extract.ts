@@ -1,4 +1,7 @@
 import { serverConfig } from '~/config/server-config'
+import { db, increment } from '~/db'
+import { userSkills } from '~/db/models/user-skills'
+import { sql } from 'drizzle-orm'
 
 // Minimal logger to mirror existing behavior
 const logger = {
@@ -193,3 +196,65 @@ export async function extractSkills(userQuery: string) {
 
 	return result
 }
+
+function toProficiencyScore(confidence?: number): string {
+	const normalized = typeof confidence === 'number' && confidence >= 0 && confidence <= 1
+		? Math.round(confidence * 100)
+		: 50
+
+	return String(normalized)
+}
+
+function toConfidence(confidence?: number): string {
+	if (typeof confidence === 'number') return String(confidence)
+
+	return '0'
+}
+
+function buildUserSkillId(userId: string, skillName: string): string {
+	return `${userId}:${skillName.toLowerCase().trim()}`
+}
+
+export async function saveExtractedSkillsForUser(
+	userId: string,
+	skills: ExtractedSkill[],
+) {
+	if (!userId || !Array.isArray(skills) || skills.length === 0) return
+
+	const now = new Date()
+
+	for (const skill of skills) {
+		const skillName = skill.name?.trim()
+		if (!skillName) continue
+
+		const id = buildUserSkillId(userId, skillName)
+		const proficiencyScore = toProficiencyScore(skill.confidence)
+		const averageConfidence = toConfidence(skill.confidence)
+
+		await db
+			.insert(userSkills)
+			.values({
+				id,
+				userId,
+				skillName,
+				mentionCount: 1,
+				lastMentioned: now,
+				proficiencyScore,
+				averageConfidence,
+				averageEngagement: 'medium',
+				topicDepthAverage: '0',
+			})
+			.onConflictDoUpdate({
+				target: userSkills.id,
+				set: {
+					mentionCount: increment(userSkills.mentionCount, 1),
+					lastMentioned: now,
+					proficiencyScore,
+					averageConfidence,
+					synonyms: sql`${userSkills.synonyms}`,
+				},
+			})
+	}
+}
+
+export type { ExtractedSkill, ExtractionResult }
