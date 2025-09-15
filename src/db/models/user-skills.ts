@@ -7,7 +7,7 @@ import { timestamps } from '../utils'
 export const userSkills = pgTable(
 	'user_skills',
 	{
-		id: text('id').primaryKey(),
+		id: uuid('id').primaryKey().defaultRandom(),
 		userId: uuid('user_id')
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }), // Changed to uuid

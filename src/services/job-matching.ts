@@ -261,3 +261,70 @@ export async function findTopCandidateIdForJob(
 
 	return topCandidate.candidate.id
 }
+
+// New types specific to job matches for a user
+type JobWithMatch = {
+	job: { id: string; title: string }
+	match: {
+		score: number
+		matchingSkills: Skill[]
+		skillGaps: Skill[]
+		overallFit: 'excellent' | 'good' | 'fair' | 'poor'
+	}
+}
+
+async function getUserSkills(userId: string): Promise<Skill[]> {
+	const rows = await db
+		.select({
+			skillName: userSkills.skillName,
+			proficiencyScore: userSkills.proficiencyScore,
+		})
+		.from(userSkills)
+		.where(sql`${userSkills.userId}::text = ${userId}`)
+
+	return rows.map((r) => ({
+		name: r.skillName,
+		proficiencyScore: parseFloat(r.proficiencyScore as unknown as string),
+		category: 'technical',
+	}))
+}
+
+export async function findTopJobsForUser(
+	userId: string,
+	options: JobMatchingOptions = {},
+): Promise<JobWithMatch[]> {
+	const { minMatchScore = 10, limit = 10 } = options
+
+	const [skills, jobs] = await Promise.all([
+		getUserSkills(userId),
+		db
+			.select({
+				id: jobPostings.id,
+				title: jobPostings.title,
+				requiredSkills: jobPostings.requiredSkills,
+				preferredSkills: jobPostings.preferredSkills,
+			})
+			.from(jobPostings),
+	])
+
+	const matches: JobWithMatch[] = jobs.map((j) => {
+		const required = toSkills(j.requiredSkills)
+		const preferred = toSkills(j.preferredSkills)
+		const result = calculateSkillMatch(skills, required, preferred)
+
+		return {
+			job: { id: j.id, title: j.title },
+			match: {
+				score: result.matchScore,
+				matchingSkills: result.matchingSkills,
+				skillGaps: result.skillGaps,
+				overallFit: result.overallFit,
+			},
+		}
+	})
+
+	return matches
+		.filter((m) => m.match.score >= minMatchScore)
+		.sort((a, b) => b.match.score - a.match.score)
+		.slice(0, limit)
+}
